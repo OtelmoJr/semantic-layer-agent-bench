@@ -115,7 +115,7 @@ def build(run_ids: list[str], out_dir: Path, split: str | None = "holdout") -> P
     lines += ["", "## Limits of this result", "",
               f"- n = {n_q} questions. With paired McNemar, differences under ~10–15 pp are unlikely to be "
               "significant at this size; read CIs, not just point estimates.",
-              "- TPC-H is public; models may have seen the schema. See the renamed-schema subset when available.",
+              "- TPC-H is public; models may have seen the schema. A renamed-schema subset to measure that is on the roadmap, not implemented yet.",
               "- One semantic layer implementation (MetricFlow) and one glossary; other modeling choices may differ."]
     _chart(scores, out_dir / "ex_by_arm.png")
     lines += ["", "![Execution accuracy by arm](ex_by_arm.png)", ""]

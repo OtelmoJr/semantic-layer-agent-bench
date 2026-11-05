@@ -1,0 +1,7 @@
+# Copy to config/prices.yaml and fill in current list prices (USD per million tokens)
+# from the provider's pricing page. Prices are deliberately not hardcoded: they change,
+# and a stale number would make --budget-usd silently wrong.
+#
+# <model id as passed to --model or the provider default>:
+#   input_usd_per_mtok: <number>
+#   output_usd_per_mtok: <number>

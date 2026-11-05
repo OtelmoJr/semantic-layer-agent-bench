@@ -1,0 +1,30 @@
+name: ci
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          pip install uv
+          make install
+      - name: Unit tests (no data)
+        run: make test-fast
+      - name: Data + semantic layer
+        run: make data
+      - name: Gold set frozen and valid
+        run: make gold-check
+      - name: Parity (semantic layer == reference SQL)
+        run: make parity
+      - name: Full test suite
+        run: make test
+      - name: Smoke (stub over stdio MCP)
+        run: make smoke

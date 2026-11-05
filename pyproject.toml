@@ -3,7 +3,6 @@ name = "semantic-layer-agent-bench"
 version = "0.1.0"
 description = "Does a semantic layer make text-to-SQL agents more accurate, or does documentation do the job? A controlled, reproducible benchmark."
 requires-python = ">=3.11,<3.13"
-license = { text = "Apache-2.0" }
 dependencies = [
   "duckdb>=2.0,<3",
   "tpchgen-cli>=2.0",

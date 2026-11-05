@@ -1,0 +1,9 @@
+Para avaliar agente text-to-SQL eu escrevo as perguntas antes de modelar qualquer coisa. Neste experimento, que compara schema cru, schema documentado e semantic layer, as 150 perguntas saem do ponto de vista de quem pede o número, e eu congelo o arquivo com hash no git antes da primeira linha de MetricFlow. Se eu modelasse as métricas olhando as perguntas, o semantic layer ganharia por construção.
+
+Também não uso LLM como juiz de correção. Cada pergunta tem um SQL de referência, e o que conta é o resultado executado, comparado sem depender de ordem de linha, nome de coluna ou arredondamento. Juiz custa token, varia entre execuções e tende a aceitar resposta bem escrita com número errado. Antes de rodar qualquer agente, um teste de paridade confere se cada métrica modelada devolve o mesmo resultado do SQL de referência, para o braço do semantic layer não ser punido por bug meu.
+
+EN below
+
+When I evaluate a text-to-SQL agent, I write the questions before I model anything. In this experiment, which compares raw schema, documented schema and a semantic layer, the 150 questions come from the point of view of whoever asks for the number, and I freeze the file with a hash in git before the first line of MetricFlow. If I modeled the metrics while looking at the questions, the semantic layer would win by construction.
+
+I also don't use an LLM to judge correctness. Every question has a reference SQL, and what counts is the executed result, compared regardless of row order, column names or rounding. A judge costs tokens, drifts between runs and tends to accept a well written answer with the wrong number. Before any agent runs, a parity test checks that every modeled metric returns the same result as its reference SQL, so the semantic layer arm never pays for my own modeling bugs.

@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Semantic Layer Agent Bench</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #151b23; --line: #2a313c;
+    --fg: #e6edf3; --muted: #8b949e; --dim: #6e7681;
+    --a: #8b949e; --b: #e3b341; --c: #3fb6a8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; background: var(--bg); }
+  body {
+    font-family: "Inter", sans-serif; color: var(--fg);
+    padding: 72px 72px 56px; display: flex; flex-direction: column;
+  }
+  .mono { font-family: "JetBrains Mono", monospace; }
+  .kicker {
+    font-size: 22px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--c); display: flex; align-items: center; gap: 14px;
+  }
+  .kicker .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--c); }
+  h1 {
+    font-family: "Inter Display", "Inter", sans-serif; font-weight: 700;
+    font-size: 70px; line-height: 1.06; letter-spacing: -.02em; margin-top: 30px;
+  }
+  h1 em { font-style: normal; color: var(--b); }
+  .sub { font-size: 27px; line-height: 1.4; color: var(--muted); margin-top: 24px; max-width: 900px; }
+
+  .arms { margin-top: 64px; display: flex; flex-direction: column; gap: 30px; }
+  .arm {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
+    padding: 34px 32px; display: grid; grid-template-columns: 64px 1fr 230px;
+    align-items: center; gap: 24px; position: relative;
+  }
+  .arm.b { border-color: var(--b); }
+  .letter {
+    width: 64px; height: 64px; border-radius: 14px; display: grid; place-items: center;
+    font-weight: 700; font-size: 32px; color: var(--bg);
+  }
+  .a .letter { background: var(--a); } .b .letter { background: var(--b); } .c .letter { background: var(--c); }
+  .name { font-size: 32px; font-weight: 600; }
+  .tools { font-size: 19px; color: var(--muted); margin-top: 8px; }
+  .bar {
+    height: 64px; border: 2px dashed var(--line); border-radius: 12px;
+    display: flex; align-items: center; justify-content: flex-end; padding: 0 20px;
+    font-size: 26px; color: var(--dim);
+  }
+  .tag {
+    position: absolute; top: -15px; right: 28px; background: var(--b); color: var(--bg);
+    font-size: 17px; font-weight: 700; padding: 5px 12px; border-radius: 8px;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  .verdict {
+    margin-top: 44px; font-size: 26px; line-height: 1.45; color: var(--muted);
+    border-left: 4px solid var(--b); padding: 4px 0 4px 22px;
+  }
+  .verdict b { color: var(--fg); font-weight: 600; }
+
+  .chips { margin-top: 48px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .chip {
+    font-size: 19px; color: var(--fg); border: 1px solid var(--line);
+    border-radius: 999px; padding: 9px 18px; background: #11161d;
+  }
+  .footer {
+    margin-top: auto; display: flex; justify-content: space-between; align-items: baseline;
+    border-top: 1px solid var(--line); padding-top: 26px;
+  }
+  .who { font-size: 26px; font-weight: 600; }
+  .who span { color: var(--muted); font-weight: 400; }
+  .where { font-size: 20px; color: var(--muted); }
+</style>
+</head>
+<body>
+  <div class="kicker mono"><span class="dot"></span><span data-k="kicker"></span></div>
+  <h1 data-k="title"></h1>
+  <p class="sub" data-k="sub"></p>
+
+  <div class="arms">
+    <div class="arm a">
+      <div class="letter mono">A</div>
+      <div><div class="name" data-k="a_name"></div><div class="tools mono">list_tables · describe_table · run_sql</div></div>
+      <div class="bar mono">EX = ?</div>
+    </div>
+    <div class="arm b">
+      <span class="tag" data-k="b_tag"></span>
+      <div class="letter mono">B</div>
+      <div><div class="name" data-k="b_name"></div><div class="tools mono" data-k="b_tools"></div></div>
+      <div class="bar mono">EX = ?</div>
+    </div>
+    <div class="arm c">
+      <div class="letter mono">C</div>
+      <div><div class="name" data-k="c_name"></div><div class="tools mono">list_metrics · query_metrics (MetricFlow)</div></div>
+      <div class="bar mono">EX = ?</div>
+    </div>
+  </div>
+
+  <p class="verdict" data-k="verdict"></p>
+
+  <div class="chips mono" data-k="chips"></div>
+
+  <div class="footer">
+    <div class="who">Otelmo Junior <span>· AI Data Engineer</span></div>
+    <div class="where mono" data-k="where"></div>
+  </div>
+
+<script>
+const T = {
+  pt: {
+    kicker: "Experimento · resultados em jan/2027",
+    title: "O ganho vem do <em>semantic layer</em> ou da documentação?",
+    sub: "Agente text-to-SQL, mesmo loop, mesmas regras. 150 perguntas de negócio congeladas antes de qualquer métrica ser modelada.",
+    a_name: "Schema cru",
+    b_name: "Schema cru + definições em texto",
+    b_tools: "tools de A + regras de negócio no contexto",
+    b_tag: "o controle que falta",
+    c_name: "Semantic layer",
+    verdict: "Se <b>B ≈ C</b>, o ganho era documentação. Se <b>C ≫ B</b>, a camada se paga.",
+    chips: ["TPC-H SF1 · DuckDB", "MCP read-only", "2 modelos × 3 repetições", "execution accuracy", "IC 95% · McNemar", "OpenTelemetry"],
+    where: "local · custo zero de cloud"
+  },
+  en: {
+    kicker: "Experiment · results in Jan 2027",
+    title: "Is the gain from the <em>semantic layer</em> or the documentation?",
+    sub: "Text-to-SQL agent, same loop, same rules. 150 business questions frozen before a single metric was modeled.",
+    a_name: "Raw schema",
+    b_name: "Raw schema + written definitions",
+    b_tools: "A's tools + business rules in context",
+    b_tag: "the missing control",
+    c_name: "Semantic layer",
+    verdict: "If <b>B ≈ C</b>, the gain was documentation. If <b>C ≫ B</b>, the layer pays for itself.",
+    chips: ["TPC-H SF1 · DuckDB", "read-only MCP", "2 models × 3 runs", "execution accuracy", "95% CI · McNemar", "OpenTelemetry"],
+    where: "local · zero cloud cost"
+  }
+};
+const lang = new URLSearchParams(location.search).get("lang") || "pt";
+const t = T[lang];
+document.documentElement.lang = lang;
+document.querySelectorAll("[data-k]").forEach(el => {
+  const v = t[el.dataset.k];
+  if (Array.isArray(v)) el.innerHTML = v.map(s => `<span class="chip">${s}</span>`).join("");
+  else el.innerHTML = v;
+});
+</script>
+</body>
+</html>

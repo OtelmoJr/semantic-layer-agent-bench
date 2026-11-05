@@ -1,0 +1,34 @@
+# docker compose run --rm bench data           # generate TPC-H + build semantic layer
+# docker compose run --rm bench test           # full test suite
+# docker compose run --rm bench smoke          # stub end-to-end, EX = 70%
+# docker compose exec ollama ollama pull <model>
+# docker compose run --rm bench bench-ollama MODEL=<model>
+# Traces: http://localhost:6006 (Phoenix)
+services:
+  bench:
+    build: .
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://phoenix:6006
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      PY: python
+      SLAB: slab
+      DBT: dbt
+    volumes:
+      - ./data:/app/data
+      - ./runs:/app/runs
+      - ./config:/app/config
+    depends_on: [ollama, phoenix]
+
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama:/root/.ollama
+    ports: ["11434:11434"]
+
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    ports: ["6006:6006"]
+
+volumes:
+  ollama:

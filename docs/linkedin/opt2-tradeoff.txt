@@ -1,0 +1,9 @@
+Dar a um agente SQL livre ou só um semantic layer é trocar cobertura por consistência. Com SQL livre ele responde qualquer pergunta que o schema permite, mas cada execução pode reinventar o que é receita líquida ou cliente ativo, e um join errado volta como número plausível, sem erro nenhum. Com o semantic layer a definição de negócio fica fixa e o agente só escolhe métrica, dimensão e filtro. Em troca, ele só responde o que alguém modelou, e cada pergunta fora da cobertura vira trabalho de modelagem.
+
+Minha suspeita é que o critério que decide é a fração das perguntas reais que cai dentro da cobertura, somada ao tamanho do modelo. Modelo pequeno deve ganhar mais com menos graus de liberdade. Estou medindo isso com 150 perguntas sobre TPC-H, três braços e dois modelos, incluindo 20 perguntas fora da cobertura de propósito.
+
+EN below
+
+Giving an agent free SQL or only a semantic layer is a trade between coverage and consistency. Free SQL answers anything the schema allows, but every run can reinvent what net revenue or active customer means, and a bad join comes back as a plausible number with no error at all. A semantic layer pins the business definition and leaves the agent to pick metric, dimension and filter. The price is that it only answers what someone modeled, and every question outside that coverage turns into modeling work.
+
+My working guess is that the deciding factor is the share of real questions that fall inside coverage, combined with model size. Smaller models should gain more from fewer degrees of freedom. I'm measuring it with 150 questions over TPC-H, three arms and two models, including 20 questions that sit outside coverage on purpose.

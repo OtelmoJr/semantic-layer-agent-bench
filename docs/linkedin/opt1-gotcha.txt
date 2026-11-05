@@ -1,0 +1,9 @@
+Os benchmarks de semantic layer para agente text-to-SQL que encontrei comparam duas configurações. Um agente recebe o schema cru, o outro consulta métricas definidas, o semantic layer ganha e a conclusão parece óbvia. Só que a segunda configuração muda duas variáveis ao mesmo tempo, porque adiciona a camada de abstração e também a documentação das regras de negócio. Sem separar as duas, não dá para saber qual delas moveu o número.
+
+Estou montando um experimento com um braço no meio, o mesmo schema cru com as definições das métricas escritas como texto no contexto. Se esse braço chegar perto do semantic layer, o ganho vinha da documentação e não da camada. São 150 perguntas de negócio sobre TPC-H em DuckDB, congeladas antes de eu modelar qualquer métrica no MetricFlow, avaliadas por execution accuracy em dois modelos e três repetições. Os resultados saem no começo de janeiro, com intervalo de confiança.
+
+EN below
+
+Most semantic layer benchmarks for text-to-SQL agents I've found compare two setups. One agent gets the raw schema, the other queries governed metrics, the semantic layer wins and everyone moves on. But the second setup changes two variables at once. It adds an abstraction layer and it adds written business definitions, so you can't tell which one moved the number.
+
+I'm running an experiment with a third arm in between. Same raw schema, plus the metric definitions as plain text in the context. If that arm lands close to the semantic layer, the gain came from documentation and not from the layer. The setup is 150 business questions over TPC-H on DuckDB, frozen before I modeled a single metric in MetricFlow, scored by execution accuracy across two models and three runs each. Results with confidence intervals land in early January.
