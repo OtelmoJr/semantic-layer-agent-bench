@@ -1,0 +1,345 @@
+- id: bd001
+  category: business_definition
+  coverage: in
+  question: "What was our revenue in 1994?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+
+- id: bd002
+  category: business_definition
+  coverage: in
+  question: "What were total sales for Q4 1995?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1995-10-01' AND o.o_orderdate < DATE '1996-01-01'
+
+- id: bd003
+  category: business_definition
+  coverage: in
+  question: "What was the return rate for 1994?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(CASE WHEN l.l_returnflag = 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+             / SUM(l.l_extendedprice * (1 - l.l_discount)) AS return_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+
+- id: bd004
+  category: business_definition
+  coverage: in
+  question: "What was our average order value in 1993?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(CASE WHEN l.l_returnflag <> 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+             / COUNT(DISTINCT l.l_orderkey) AS average_order_value
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+
+- id: bd005
+  category: business_definition
+  coverage: in
+  question: "What share of order lines from 1995 orders were delivered late?"
+  order_matters: false
+  reference_sql: |
+    SELECT AVG(CASE WHEN l.l_receiptdate > l.l_commitdate THEN 1.0 ELSE 0.0 END) AS late_line_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+
+- id: bd006
+  category: business_definition
+  coverage: in
+  question: "How much revenue did customers in Europe generate in 1993?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    JOIN region r ON r.r_regionkey = n.n_regionkey
+    WHERE l.l_returnflag <> 'R'
+      AND r.r_name = 'EUROPE'
+      AND o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+
+- id: bd007
+  category: business_definition
+  coverage: in
+  question: "How much revenue came from parts supplied from Europe in 1993?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation n ON n.n_nationkey = s.s_nationkey
+    JOIN region r ON r.r_regionkey = n.n_regionkey
+    WHERE l.l_returnflag <> 'R'
+      AND r.r_name = 'EUROPE'
+      AND o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+
+- id: bd008
+  category: business_definition
+  coverage: in
+  question: "How many active customers did we have in 1995?"
+  order_matters: false
+  reference_sql: |
+    SELECT COUNT(DISTINCT o.o_custkey) AS active_customers
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+
+- id: bd009
+  category: business_definition
+  coverage: in
+  question: "How many customers in the AUTOMOBILE segment were active during the first half of 1996?"
+  order_matters: false
+  reference_sql: |
+    SELECT COUNT(DISTINCT o.o_custkey) AS active_customers
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    WHERE c.c_mktsegment = 'AUTOMOBILE'
+      AND o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1996-07-01'
+
+- id: bd010
+  category: business_definition
+  coverage: in
+  question: "What did we make in sales in December 1994?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1994-12-01' AND o.o_orderdate < DATE '1995-01-01'
+
+- id: bd011
+  category: business_definition
+  coverage: in
+  question: "What was the average order value for customers in Asia in 1995?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(CASE WHEN l.l_returnflag <> 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+             / COUNT(DISTINCT l.l_orderkey) AS average_order_value
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    JOIN region r ON r.r_regionkey = n.n_regionkey
+    WHERE r.r_name = 'ASIA'
+      AND o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+
+- id: bd012
+  category: business_definition
+  coverage: in
+  question: "What was the return rate for German customers in 1993?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(CASE WHEN l.l_returnflag = 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+             / SUM(l.l_extendedprice * (1 - l.l_discount)) AS return_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    WHERE n.n_name = 'GERMANY'
+      AND o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+
+- id: bd013
+  category: business_definition
+  coverage: in
+  question: "How much did we invoice for orders placed in 1994?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_extendedprice * (1 - l.l_discount) * (1 + l.l_tax)) AS billed_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+
+- id: bd014
+  category: business_definition
+  coverage: in
+  question: "How much money did we give away in discounts in 1993?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_extendedprice * l.l_discount) AS discount_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+
+- id: bd015
+  category: business_definition
+  coverage: in
+  question: "How many units did HOUSEHOLD-segment customers order in 1994?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_quantity) AS units_ordered
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    WHERE c.c_mktsegment = 'HOUSEHOLD'
+      AND o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+
+- id: bd016
+  category: business_definition
+  coverage: in
+  question: "Break down 1996 revenue by customer region."
+  order_matters: false
+  reference_sql: |
+    SELECT r.r_name AS customer_region,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    JOIN region r ON r.r_regionkey = n.n_regionkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY 1
+
+- id: bd017
+  category: business_definition
+  coverage: in
+  question: "Split 1995 revenue by the region our parts were supplied from."
+  order_matters: false
+  reference_sql: |
+    SELECT r.r_name AS supplier_region,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation n ON n.n_nationkey = s.s_nationkey
+    JOIN region r ON r.r_regionkey = n.n_regionkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY 1
+
+- id: bd018
+  category: business_definition
+  coverage: in
+  question: "For each ship mode, what was the late delivery rate on 1996 orders?"
+  order_matters: false
+  reference_sql: |
+    SELECT l.l_shipmode AS ship_mode,
+           AVG(CASE WHEN l.l_receiptdate > l.l_commitdate THEN 1.0 ELSE 0.0 END) AS late_line_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY 1
+
+- id: bd019
+  category: business_definition
+  coverage: in
+  question: "Which 5 customer nations brought in the most revenue in 1994?"
+  order_matters: true
+  reference_sql: |
+    SELECT n.n_name AS customer_nation,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY 1
+    ORDER BY net_revenue DESC
+    LIMIT 5
+
+- id: bd020
+  category: business_definition
+  coverage: in
+  question: "What was gross revenue in 1994?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_extendedprice) AS gross_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+
+- id: bd021
+  category: business_definition
+  coverage: in
+  question: "How many orders did customers in the Americas region place in Q2 1996?"
+  order_matters: false
+  reference_sql: |
+    SELECT COUNT(DISTINCT l.l_orderkey) AS order_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    JOIN region r ON r.r_regionkey = n.n_regionkey
+    WHERE r.r_name = 'AMERICA'
+      AND o.o_orderdate >= DATE '1996-04-01' AND o.o_orderdate < DATE '1996-07-01'
+
+- id: bd022
+  category: business_definition
+  coverage: in
+  question: "Rank the market segments by revenue for Q1 1997 and give me the top 3."
+  order_matters: true
+  reference_sql: |
+    SELECT c.c_mktsegment AS market_segment,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1997-04-01'
+    GROUP BY 1
+    ORDER BY net_revenue DESC
+    LIMIT 3
+
+- id: bd023
+  category: business_definition
+  coverage: in
+  question: "What was the return rate on parts supplied from Asia for 1993 orders?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(CASE WHEN l.l_returnflag = 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+             / SUM(l.l_extendedprice * (1 - l.l_discount)) AS return_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation n ON n.n_nationkey = s.s_nationkey
+    JOIN region r ON r.r_regionkey = n.n_regionkey
+    WHERE r.r_name = 'ASIA'
+      AND o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+
+- id: bd024
+  category: business_definition
+  coverage: in
+  question: "What was the average order value in each quarter of 1994?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('quarter', o.o_orderdate) AS DATE) AS order_quarter,
+           SUM(CASE WHEN l.l_returnflag <> 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+             / COUNT(DISTINCT l.l_orderkey) AS average_order_value
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY 1
+
+- id: bd025
+  category: business_definition
+  coverage: in
+  question: "How many customers in Europe were active in Q3 1997?"
+  order_matters: false
+  reference_sql: |
+    SELECT COUNT(DISTINCT o.o_custkey) AS active_customers
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    JOIN region r ON r.r_regionkey = n.n_regionkey
+    WHERE r.r_name = 'EUROPE'
+      AND o.o_orderdate >= DATE '1997-07-01' AND o.o_orderdate < DATE '1997-10-01'

@@ -1,0 +1,146 @@
+# Business glossary: the single source of truth for business definitions.
+#
+# It is rendered two ways, and that is the whole experiment:
+#   * Arm B receives it as plain text in the system prompt (business text + raw SQL recipe).
+#   * Arm C receives the same business text through the semantic layer (MetricFlow),
+#     whose metrics are implemented from this file.
+# Arm A receives nothing from here.
+#
+# Data: TPC-H. Orders were placed from 1992-01-01 to 1998-08-02 (1998 is a partial year).
+
+conventions:
+  - Sales, revenue and order metrics are attributed to the ORDER DATE (orders.o_orderdate), never to ship or receipt dates, unless a question explicitly says otherwise.
+  - An order line is a row of lineitem joined to its order (lineitem.l_orderkey = orders.o_orderkey).
+  - Customer location means the customer's nation (customer.c_nationkey -> nation) and that nation's region. Supplier location means the supplier's nation and region.
+  - A returned line is a line with lineitem.l_returnflag = 'R'.
+  - Rates are fractions between 0 and 1, not percentages.
+
+metrics:
+  - name: gross_revenue
+    label: Gross revenue
+    description: List-price value of all order lines before discounts, including returned lines.
+    raw_sql: SUM(l_extendedprice) over all order lines.
+
+  - name: net_revenue
+    label: Net revenue
+    description: Revenue after discounts, EXCLUDING returned lines. This is the company's official revenue figure.
+    raw_sql: SUM(l_extendedprice * (1 - l_discount)) over order lines WHERE l_returnflag <> 'R'.
+
+  - name: returned_revenue
+    label: Returned revenue
+    description: Discounted value of returned lines.
+    raw_sql: SUM(l_extendedprice * (1 - l_discount)) over order lines WHERE l_returnflag = 'R'.
+
+  - name: return_rate
+    label: Return rate
+    description: Share of discounted revenue that was returned (fraction 0-1).
+    raw_sql: SUM(CASE WHEN l_returnflag = 'R' THEN l_extendedprice * (1 - l_discount) ELSE 0 END) / SUM(l_extendedprice * (1 - l_discount)), over all order lines.
+
+  - name: discount_amount
+    label: Discount amount
+    description: Money given away in discounts, all order lines including returned ones.
+    raw_sql: SUM(l_extendedprice * l_discount).
+
+  - name: average_discount
+    label: Average discount
+    description: Simple average of the discount rate per order line (fraction 0-1), all lines.
+    raw_sql: AVG(l_discount).
+
+  - name: billed_amount
+    label: Billed amount
+    description: What was invoiced, discounted price plus tax, all order lines including returned ones.
+    raw_sql: SUM(l_extendedprice * (1 - l_discount) * (1 + l_tax)).
+
+  - name: units_ordered
+    label: Units ordered
+    description: Quantity of units on order lines, all lines including returned ones.
+    raw_sql: SUM(l_quantity).
+
+  - name: order_line_count
+    label: Order lines
+    description: Number of order lines.
+    raw_sql: COUNT(*) of lineitem rows.
+
+  - name: order_count
+    label: Orders
+    description: Number of distinct orders with at least one line in the slice.
+    raw_sql: COUNT(DISTINCT l_orderkey) over order lines.
+
+  - name: active_customers
+    label: Active customers
+    description: Number of distinct customers with at least one order in the slice.
+    raw_sql: COUNT(DISTINCT o_custkey) over order lines joined to orders.
+
+  - name: average_order_value
+    label: Average order value
+    description: Net revenue divided by the number of orders (all orders count in the denominator).
+    raw_sql: net_revenue / order_count, both computed over the same slice.
+
+  - name: late_line_rate
+    label: Late line rate
+    description: Share of order lines received after the committed date (fraction 0-1).
+    raw_sql: AVG(CASE WHEN l_receiptdate > l_commitdate THEN 1.0 ELSE 0.0 END) over order lines.
+
+  - name: net_revenue_yoy_growth
+    label: Net revenue YoY growth
+    description: Net revenue growth against the same period one year earlier, as a fraction (0.05 = +5%). Requires a time grouping by order date.
+    raw_sql: (net_revenue(period) - net_revenue(same period one year earlier)) / net_revenue(same period one year earlier), periods by order date.
+
+dimensions:
+  - name: order_date
+    description: Date the order was placed. The reference date for every metric. Groupable by day, week, month, quarter or year; time buckets are returned as the DATE that starts the bucket.
+    raw_sql: orders.o_orderdate
+  - name: ship_date
+    description: Date the order line was shipped.
+    raw_sql: lineitem.l_shipdate
+  - name: ship_mode
+    description: Shipping mode of the line (AIR, FOB, MAIL, RAIL, REG AIR, SHIP, TRUCK).
+    raw_sql: lineitem.l_shipmode
+  - name: return_flag
+    description: R = returned, A = accepted, N = not yet delivered.
+    raw_sql: lineitem.l_returnflag
+  - name: line_status
+    description: F = fulfilled, O = open.
+    raw_sql: lineitem.l_linestatus
+  - name: order_priority
+    description: Order priority (1-URGENT to 5-LOW).
+    raw_sql: orders.o_orderpriority
+  - name: order_status
+    description: F = fully fulfilled, O = open, P = partially fulfilled.
+    raw_sql: orders.o_orderstatus
+  - name: customer_name
+    description: Customer name.
+    raw_sql: customer.c_name
+  - name: market_segment
+    description: Customer market segment (AUTOMOBILE, BUILDING, FURNITURE, HOUSEHOLD, MACHINERY).
+    raw_sql: customer.c_mktsegment
+  - name: customer_nation
+    description: Nation of the customer.
+    raw_sql: nation.n_name via customer.c_nationkey
+  - name: customer_region
+    description: Region of the customer's nation.
+    raw_sql: region.r_name via customer -> nation -> region
+  - name: part_brand
+    description: Part brand, e.g. Brand#13.
+    raw_sql: part.p_brand
+  - name: part_manufacturer
+    description: Part manufacturer, e.g. Manufacturer#1.
+    raw_sql: part.p_mfgr
+  - name: part_type
+    description: Part type, e.g. ECONOMY ANODIZED STEEL.
+    raw_sql: part.p_type
+  - name: part_size
+    description: Part size (integer 1-50).
+    raw_sql: part.p_size
+  - name: part_container
+    description: Part container, e.g. SM CASE.
+    raw_sql: part.p_container
+  - name: supplier_name
+    description: Supplier name.
+    raw_sql: supplier.s_name
+  - name: supplier_nation
+    description: Nation of the supplier.
+    raw_sql: nation.n_name via supplier.s_nationkey
+  - name: supplier_region
+    description: Region of the supplier's nation.
+    raw_sql: region.r_name via supplier -> nation -> region

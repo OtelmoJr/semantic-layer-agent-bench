@@ -1,0 +1,796 @@
+- id: mj001
+  category: multi_join
+  coverage: in
+  question: "Break down net revenue from orders placed in 1996 by customer region and supplier region."
+  order_matters: false
+  reference_sql: |
+    SELECT cr.r_name AS customer_region,
+           sr.r_name AS supplier_region,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY cr.r_name, sr.r_name
+
+- id: mj002
+  category: multi_join
+  coverage: in
+  question: "How many units did customers in Asia order in 1997, broken down by part manufacturer?"
+  order_matters: false
+  reference_sql: |
+    SELECT p.p_mfgr AS part_manufacturer,
+           SUM(l.l_quantity) AS units_ordered
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE cr.r_name = 'ASIA'
+      AND o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY p.p_mfgr
+
+- id: mj003
+  category: multi_join
+  coverage: in
+  question: "For customers located in Europe, how many active customers did we have in 1995 by market segment and customer nation?"
+  order_matters: false
+  reference_sql: |
+    SELECT c.c_mktsegment AS market_segment,
+           cn.n_name AS customer_nation,
+           COUNT(DISTINCT o.o_custkey) AS active_customers
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    WHERE cr.r_name = 'EUROPE'
+      AND o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY c.c_mktsegment, cn.n_name
+
+- id: mj004
+  category: multi_join
+  coverage: in
+  question: "Which 10 suppliers generated the most net revenue from Brand#23 parts on orders placed in 1994? List them from highest to lowest."
+  order_matters: true
+  reference_sql: |
+    SELECT s.s_name AS supplier_name,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE l.l_returnflag <> 'R'
+      AND p.p_brand = 'Brand#23'
+      AND o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY s.s_name
+    ORDER BY net_revenue DESC
+    LIMIT 10
+
+- id: mj005
+  category: multi_join
+  coverage: in
+  question: "How many orders were placed in 1993, split by customer region and order priority?"
+  order_matters: false
+  reference_sql: |
+    SELECT cr.r_name AS customer_region,
+           o.o_orderpriority AS order_priority,
+           COUNT(DISTINCT l.l_orderkey) AS order_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    WHERE o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+    GROUP BY cr.r_name, o.o_orderpriority
+
+- id: mj006
+  category: multi_join
+  coverage: in
+  question: "What was the return rate by supplier nation for orders placed in 1994 by customers in America?"
+  order_matters: false
+  reference_sql: |
+    SELECT sn.n_name AS supplier_nation,
+           SUM(CASE WHEN l.l_returnflag = 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+             / SUM(l.l_extendedprice * (1 - l.l_discount)) AS return_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    WHERE cr.r_name = 'AMERICA'
+      AND o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY sn.n_name
+
+- id: mj007
+  category: multi_join
+  coverage: in
+  question: "Show gross revenue for 1995 orders by part manufacturer and supplier region."
+  order_matters: false
+  reference_sql: |
+    SELECT p.p_mfgr AS part_manufacturer,
+           sr.r_name AS supplier_region,
+           SUM(l.l_extendedprice) AS gross_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY p.p_mfgr, sr.r_name
+
+- id: mj008
+  category: multi_join
+  coverage: in
+  question: "Considering only goods supplied by European suppliers, which 5 customer nations brought in the most net revenue on orders placed in 1996? Rank them from highest to lowest."
+  order_matters: true
+  reference_sql: |
+    SELECT cn.n_name AS customer_nation,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE l.l_returnflag <> 'R'
+      AND sr.r_name = 'EUROPE'
+      AND o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY cn.n_name
+    ORDER BY net_revenue DESC
+    LIMIT 5
+
+- id: mj009
+  category: multi_join
+  coverage: in
+  question: "What was the average order value in 1997 for each combination of customer region and market segment?"
+  order_matters: false
+  reference_sql: |
+    SELECT cr.r_name AS customer_region,
+           c.c_mktsegment AS market_segment,
+           SUM(CASE WHEN l.l_returnflag <> 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+             / COUNT(DISTINCT l.l_orderkey) AS average_order_value
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    WHERE o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY cr.r_name, c.c_mktsegment
+
+- id: mj010
+  category: multi_join
+  coverage: in
+  question: "How much did we give away in discounts in the first quarter of 1995, by supplier region and ship mode?"
+  order_matters: false
+  reference_sql: |
+    SELECT sr.r_name AS supplier_region,
+           l.l_shipmode AS ship_mode,
+           SUM(l.l_extendedprice * l.l_discount) AS discount_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1995-04-01'
+    GROUP BY sr.r_name, l.l_shipmode
+
+- id: mj011
+  category: multi_join
+  coverage: in
+  question: "Give me the billed amount for customers in Africa by customer nation and order quarter for 1996."
+  order_matters: false
+  reference_sql: |
+    SELECT cn.n_name AS customer_nation,
+           CAST(date_trunc('quarter', o.o_orderdate) AS DATE) AS order_quarter,
+           SUM(l.l_extendedprice * (1 - l.l_discount) * (1 + l.l_tax)) AS billed_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    WHERE cr.r_name = 'AFRICA'
+      AND o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY cn.n_name, CAST(date_trunc('quarter', o.o_orderdate) AS DATE)
+
+- id: mj012
+  category: multi_join
+  coverage: in
+  question: "For orders placed in 1997, what was the late line rate for each pair of supplier region and customer region?"
+  order_matters: false
+  reference_sql: |
+    SELECT sr.r_name AS supplier_region,
+           cr.r_name AS customer_region,
+           AVG(CASE WHEN l.l_receiptdate > l.l_commitdate THEN 1.0 ELSE 0.0 END) AS late_line_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY sr.r_name, cr.r_name
+
+- id: mj013
+  category: multi_join
+  coverage: in
+  question: "Who were the top 10 Middle East customers by net revenue on Manufacturer#3 parts in 1995? Order them from highest to lowest."
+  order_matters: true
+  reference_sql: |
+    SELECT c.c_name AS customer_name,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE l.l_returnflag <> 'R'
+      AND cr.r_name = 'MIDDLE EAST'
+      AND p.p_mfgr = 'Manufacturer#3'
+      AND o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY c.c_name
+    ORDER BY net_revenue DESC
+    LIMIT 10
+
+- id: mj014
+  category: multi_join
+  coverage: in
+  question: "How many order lines did European customers place in 1993 with German suppliers, broken down by part container?"
+  order_matters: false
+  reference_sql: |
+    SELECT p.p_container AS part_container,
+           COUNT(*) AS order_line_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE cr.r_name = 'EUROPE'
+      AND sn.n_name = 'GERMANY'
+      AND o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+    GROUP BY p.p_container
+
+- id: mj015
+  category: multi_join
+  coverage: in
+  question: "For suppliers based in Asia, what was the returned revenue on 1994 orders by customer region and supplier nation?"
+  order_matters: false
+  reference_sql: |
+    SELECT cr.r_name AS customer_region,
+           sn.n_name AS supplier_nation,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS returned_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE l.l_returnflag = 'R'
+      AND sr.r_name = 'ASIA'
+      AND o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY cr.r_name, sn.n_name
+
+- id: mj016
+  category: multi_join
+  coverage: in
+  question: "What was the average discount on orders placed in 1992, by customer market segment and supplier region?"
+  order_matters: false
+  reference_sql: |
+    SELECT c.c_mktsegment AS market_segment,
+           sr.r_name AS supplier_region,
+           AVG(l.l_discount) AS average_discount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE o.o_orderdate >= DATE '1992-01-01' AND o.o_orderdate < DATE '1993-01-01'
+    GROUP BY c.c_mktsegment, sr.r_name
+
+- id: mj017
+  category: multi_join
+  coverage: in
+  question: "Among automobile-segment customers in Japan, which 3 supplier nations supplied the most units on orders placed in 1996? Rank them from most to fewest units."
+  order_matters: true
+  reference_sql: |
+    SELECT sn.n_name AS supplier_nation,
+           SUM(l.l_quantity) AS units_ordered
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    WHERE c.c_mktsegment = 'AUTOMOBILE'
+      AND cn.n_name = 'JAPAN'
+      AND o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY sn.n_name
+    ORDER BY units_ordered DESC
+    LIMIT 3
+
+- id: mj018
+  category: multi_join
+  coverage: in
+  question: "How many active customers did we have in 1998 by customer region and part manufacturer?"
+  order_matters: false
+  reference_sql: |
+    SELECT cr.r_name AS customer_region,
+           p.p_mfgr AS part_manufacturer,
+           COUNT(DISTINCT o.o_custkey) AS active_customers
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE o.o_orderdate >= DATE '1998-01-01' AND o.o_orderdate < DATE '1999-01-01'
+    GROUP BY cr.r_name, p.p_mfgr
+
+- id: mj019
+  category: multi_join
+  coverage: in
+  question: "Show monthly net revenue in 1995 from customers in France on goods supplied by German suppliers."
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('month', o.o_orderdate) AS DATE) AS order_month,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    WHERE l.l_returnflag <> 'R'
+      AND cn.n_name = 'FRANCE'
+      AND sn.n_name = 'GERMANY'
+      AND o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY CAST(date_trunc('month', o.o_orderdate) AS DATE)
+
+- id: mj020
+  category: multi_join
+  coverage: in
+  question: "For customers in Canada, how many orders were placed in 1995 by order status and supplier region?"
+  order_matters: false
+  reference_sql: |
+    SELECT o.o_orderstatus AS order_status,
+           sr.r_name AS supplier_region,
+           COUNT(DISTINCT l.l_orderkey) AS order_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE cn.n_name = 'CANADA'
+      AND o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY o.o_orderstatus, sr.r_name
+
+- id: mj021
+  category: multi_join
+  coverage: in
+  question: "What were the top 5 part brands by net revenue among building-segment customers in Asia for orders placed in 1997? Rank from highest to lowest."
+  order_matters: true
+  reference_sql: |
+    SELECT p.p_brand AS part_brand,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE l.l_returnflag <> 'R'
+      AND c.c_mktsegment = 'BUILDING'
+      AND cr.r_name = 'ASIA'
+      AND o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY p.p_brand
+    ORDER BY net_revenue DESC
+    LIMIT 5
+
+- id: mj022
+  category: multi_join
+  coverage: in
+  question: "What was the gross revenue in 1994 from Brazilian customers on goods supplied by suppliers in the America region, by market segment and supplier nation?"
+  order_matters: false
+  reference_sql: |
+    SELECT c.c_mktsegment AS market_segment,
+           sn.n_name AS supplier_nation,
+           SUM(l.l_extendedprice) AS gross_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE cn.n_name = 'BRAZIL'
+      AND sr.r_name = 'AMERICA'
+      AND o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY c.c_mktsegment, sn.n_name
+
+- id: mj023
+  category: multi_join
+  coverage: in
+  question: "For parts of size 1 through 10, how many units were ordered in 1996 by part size and customer region?"
+  order_matters: false
+  reference_sql: |
+    SELECT p.p_size AS part_size,
+           cr.r_name AS customer_region,
+           SUM(l.l_quantity) AS units_ordered
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE p.p_size BETWEEN 1 AND 10
+      AND o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY p.p_size, cr.r_name
+
+- id: mj024
+  category: multi_join
+  coverage: in
+  question: "Which 10 European suppliers had the highest billed amount on orders placed in the fourth quarter of 1997 by customers in the household segment? List them from highest to lowest."
+  order_matters: true
+  reference_sql: |
+    SELECT s.s_name AS supplier_name,
+           SUM(l.l_extendedprice * (1 - l.l_discount) * (1 + l.l_tax)) AS billed_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE sr.r_name = 'EUROPE'
+      AND c.c_mktsegment = 'HOUSEHOLD'
+      AND o.o_orderdate >= DATE '1997-10-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY s.s_name
+    ORDER BY billed_amount DESC
+    LIMIT 10
+
+- id: mj025
+  category: multi_join
+  coverage: in
+  question: "What was the return rate on 1993 orders by part manufacturer and customer region?"
+  order_matters: false
+  reference_sql: |
+    SELECT p.p_mfgr AS part_manufacturer,
+           cr.r_name AS customer_region,
+           SUM(CASE WHEN l.l_returnflag = 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+             / SUM(l.l_extendedprice * (1 - l.l_discount)) AS return_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+    GROUP BY p.p_mfgr, cr.r_name
+
+- id: mj026
+  category: multi_join
+  coverage: in
+  question: "For customers in the machinery segment, show yearly net revenue by supplier region for orders placed from 1992 through 1997."
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('year', o.o_orderdate) AS DATE) AS order_year,
+           sr.r_name AS supplier_region,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE l.l_returnflag <> 'R'
+      AND c.c_mktsegment = 'MACHINERY'
+      AND o.o_orderdate >= DATE '1992-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY CAST(date_trunc('year', o.o_orderdate) AS DATE), sr.r_name
+
+- id: mj027
+  category: multi_join
+  coverage: in
+  question: "On urgent-priority orders (1-URGENT) placed in 1996, how much discount did we give by customer region and part manufacturer?"
+  order_matters: false
+  reference_sql: |
+    SELECT cr.r_name AS customer_region,
+           p.p_mfgr AS part_manufacturer,
+           SUM(l.l_extendedprice * l.l_discount) AS discount_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE o.o_orderpriority = '1-URGENT'
+      AND o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY cr.r_name, p.p_mfgr
+
+- id: mj028
+  category: multi_join
+  coverage: in
+  question: "For suppliers located in Africa, what was the late line rate on 1997 orders by supplier nation and ship mode?"
+  order_matters: false
+  reference_sql: |
+    SELECT sn.n_name AS supplier_nation,
+           l.l_shipmode AS ship_mode,
+           AVG(CASE WHEN l.l_receiptdate > l.l_commitdate THEN 1.0 ELSE 0.0 END) AS late_line_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE sr.r_name = 'AFRICA'
+      AND o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY sn.n_name, l.l_shipmode
+
+- id: mj029
+  category: multi_join
+  coverage: in
+  question: "Looking only at order lines for Manufacturer#5 parts supplied by Asian suppliers, which 5 customer nations had the highest average order value in 1995? Rank from highest to lowest."
+  order_matters: true
+  reference_sql: |
+    SELECT cn.n_name AS customer_nation,
+           SUM(CASE WHEN l.l_returnflag <> 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+             / COUNT(DISTINCT l.l_orderkey) AS average_order_value
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE p.p_mfgr = 'Manufacturer#5'
+      AND sr.r_name = 'ASIA'
+      AND o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY cn.n_name
+    ORDER BY average_order_value DESC
+    LIMIT 5
+
+- id: mj030
+  category: multi_join
+  coverage: in
+  question: "For goods supplied by Middle East suppliers on orders placed in 1995, how many order lines were there by line status and customer region?"
+  order_matters: false
+  reference_sql: |
+    SELECT l.l_linestatus AS line_status,
+           cr.r_name AS customer_region,
+           COUNT(*) AS order_line_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE sr.r_name = 'MIDDLE EAST'
+      AND o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY l.l_linestatus, cr.r_name
+
+- id: mj031
+  category: multi_join
+  coverage: in
+  question: "What was the billed amount for parts shipped in LG BOX containers, by order quarter and customer region, for orders placed in 1994?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('quarter', o.o_orderdate) AS DATE) AS order_quarter,
+           cr.r_name AS customer_region,
+           SUM(l.l_extendedprice * (1 - l.l_discount) * (1 + l.l_tax)) AS billed_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE p.p_container = 'LG BOX'
+      AND o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY CAST(date_trunc('quarter', o.o_orderdate) AS DATE), cr.r_name
+
+- id: mj032
+  category: multi_join
+  coverage: in
+  question: "How many active customers bought from suppliers in each supplier region in 1996, split by the customers' market segment?"
+  order_matters: false
+  reference_sql: |
+    SELECT sr.r_name AS supplier_region,
+           c.c_mktsegment AS market_segment,
+           COUNT(DISTINCT o.o_custkey) AS active_customers
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY sr.r_name, c.c_mktsegment
+
+- id: mj033
+  category: multi_join
+  coverage: in
+  question: "What were the 10 part types with the most net revenue from German customers buying from European suppliers in 1995? Rank them from highest to lowest."
+  order_matters: true
+  reference_sql: |
+    SELECT p.p_type AS part_type,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE l.l_returnflag <> 'R'
+      AND cn.n_name = 'GERMANY'
+      AND sr.r_name = 'EUROPE'
+      AND o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY p.p_type
+    ORDER BY net_revenue DESC
+    LIMIT 10
+
+- id: mj034
+  category: multi_join
+  coverage: in
+  question: "For Manufacturer#2 parts bought by customers in the America region in 1998, what was the average discount by part brand?"
+  order_matters: false
+  reference_sql: |
+    SELECT p.p_brand AS part_brand,
+           AVG(l.l_discount) AS average_discount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE p.p_mfgr = 'Manufacturer#2'
+      AND cr.r_name = 'AMERICA'
+      AND o.o_orderdate >= DATE '1998-01-01' AND o.o_orderdate < DATE '1999-01-01'
+    GROUP BY p.p_brand
+
+- id: mj035
+  category: multi_join
+  coverage: in
+  question: "What was 1996 net revenue from Asian customers on goods from Asian suppliers, broken down by customer nation and order priority?"
+  order_matters: false
+  reference_sql: |
+    SELECT cn.n_name AS customer_nation,
+           o.o_orderpriority AS order_priority,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE l.l_returnflag <> 'R'
+      AND cr.r_name = 'ASIA'
+      AND sr.r_name = 'ASIA'
+      AND o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY cn.n_name, o.o_orderpriority
+
+- id: mj036
+  category: multi_join
+  coverage: in
+  question: "Which 5 supplier nations had the most returned revenue on orders placed in 1993 by customers in Europe? Rank them from highest to lowest."
+  order_matters: true
+  reference_sql: |
+    SELECT sn.n_name AS supplier_nation,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS returned_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN region cr ON cr.r_regionkey = cn.n_regionkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    WHERE l.l_returnflag = 'R'
+      AND cr.r_name = 'EUROPE'
+      AND o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+    GROUP BY sn.n_name
+    ORDER BY returned_revenue DESC
+    LIMIT 5
+
+- id: mj037
+  category: multi_join
+  coverage: in
+  question: "For furniture-segment customers, how many units were ordered in 1994 by return flag and supplier region?"
+  order_matters: false
+  reference_sql: |
+    SELECT l.l_returnflag AS return_flag,
+           sr.r_name AS supplier_region,
+           SUM(l.l_quantity) AS units_ordered
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE c.c_mktsegment = 'FURNITURE'
+      AND o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY l.l_returnflag, sr.r_name
+
+- id: mj038
+  category: multi_join
+  coverage: in
+  question: "Show weekly gross revenue for Brand#45 parts bought by customers in India on orders placed in the second quarter of 1996."
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('week', o.o_orderdate) AS DATE) AS order_week,
+           SUM(l.l_extendedprice) AS gross_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE cn.n_name = 'INDIA'
+      AND p.p_brand = 'Brand#45'
+      AND o.o_orderdate >= DATE '1996-04-01' AND o.o_orderdate < DATE '1996-07-01'
+    GROUP BY CAST(date_trunc('week', o.o_orderdate) AS DATE)
+
+- id: mj039
+  category: multi_join
+  coverage: in
+  question: "How many orders did customers in China and India place in 1997, by customer nation and supplier region?"
+  order_matters: false
+  reference_sql: |
+    SELECT cn.n_name AS customer_nation,
+           sr.r_name AS supplier_region,
+           COUNT(DISTINCT l.l_orderkey) AS order_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE cn.n_name IN ('CHINA', 'INDIA')
+      AND o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY cn.n_name, sr.r_name
+
+- id: mj040
+  category: multi_join
+  coverage: in
+  question: "Name the 10 suppliers based in Asia that earned the most net revenue from United States customers on orders placed in 1997, from highest to lowest."
+  order_matters: true
+  reference_sql: |
+    SELECT s.s_name AS supplier_name,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation cn ON cn.n_nationkey = c.c_nationkey
+    JOIN supplier s ON s.s_suppkey = l.l_suppkey
+    JOIN nation sn ON sn.n_nationkey = s.s_nationkey
+    JOIN region sr ON sr.r_regionkey = sn.n_regionkey
+    WHERE l.l_returnflag <> 'R'
+      AND cn.n_name = 'UNITED STATES'
+      AND sr.r_name = 'ASIA'
+      AND o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY s.s_name
+    ORDER BY net_revenue DESC
+    LIMIT 10

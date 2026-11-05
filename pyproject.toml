@@ -1,0 +1,42 @@
+[project]
+name = "semantic-layer-agent-bench"
+version = "0.1.0"
+description = "Does a semantic layer make text-to-SQL agents more accurate, or does documentation do the job? A controlled, reproducible benchmark."
+requires-python = ">=3.11,<3.13"
+license = { text = "Apache-2.0" }
+dependencies = [
+  "duckdb>=2.0,<3",
+  "tpchgen-cli>=2.0",
+  "dbt-metricflow[dbt-duckdb]>=0.15",
+  "sqlglot>=30",
+  "mcp>=2.0,<3",
+  "deltalake>=1.0",
+  "pyarrow>=18",
+  "pydantic>=2.8",
+  "pyyaml>=6",
+  "httpx>=0.27",
+  "anthropic>=2.0",
+  "opentelemetry-sdk>=1.30",
+  "opentelemetry-exporter-otlp-proto-http>=1.30",
+  "matplotlib>=3.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "hypothesis>=6.100"]
+
+[project.scripts]
+slab = "slab.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/slab"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "data: needs the generated TPC-H database (make data)",
+  "semantic: needs the dbt/MetricFlow project built (make data)",
+]

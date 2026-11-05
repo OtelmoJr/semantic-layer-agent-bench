@@ -1,0 +1,370 @@
+- id: tim001
+  category: time
+  coverage: in
+  question: "Show net revenue for each month of 1995."
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('month', o.o_orderdate) AS DATE) AS order_month,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY 1
+
+- id: tim002
+  category: time
+  coverage: in
+  question: "Give me quarterly net revenue from the start of 1993 through the end of 1996."
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('quarter', o.o_orderdate) AS DATE) AS order_quarter,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY 1
+
+- id: tim003
+  category: time
+  coverage: in
+  question: "How many orders were placed in each year from 1992 to 1997?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('year', o.o_orderdate) AS DATE) AS order_year,
+           COUNT(DISTINCT l.l_orderkey) AS order_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1992-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY 1
+
+- id: tim004
+  category: time
+  coverage: in
+  question: "What was net revenue in the third quarter of 1996?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1996-07-01' AND o.o_orderdate < DATE '1996-10-01'
+
+- id: tim005
+  category: time
+  coverage: in
+  question: "How much net revenue did we book in March 1994?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1994-03-01' AND o.o_orderdate < DATE '1994-04-01'
+
+- id: tim006
+  category: time
+  coverage: in
+  question: "How many active customers did we have in each month of 1997?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('month', o.o_orderdate) AS DATE) AS order_month,
+           COUNT(DISTINCT o.o_custkey) AS active_customers
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY 1
+
+- id: tim007
+  category: time
+  coverage: in
+  question: "Show the weekly number of orders for the first quarter of 1996 (weeks starting on Monday)."
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('week', o.o_orderdate) AS DATE) AS order_week,
+           COUNT(DISTINCT l.l_orderkey) AS order_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1996-04-01'
+    GROUP BY 1
+
+- id: tim008
+  category: time
+  coverage: in
+  question: "What was weekly net revenue for the eight weeks starting Monday, June 2, 1997 (Monday-start weeks)?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('week', o.o_orderdate) AS DATE) AS order_week,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1997-06-02' AND o.o_orderdate < DATE '1997-07-28'
+    GROUP BY 1
+
+- id: tim009
+  category: time
+  coverage: in
+  question: "What was the return rate in each month of 1994?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('month', o.o_orderdate) AS DATE) AS order_month,
+           SUM(CASE WHEN l.l_returnflag = 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+             / SUM(l.l_extendedprice * (1 - l.l_discount)) AS return_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY 1
+
+- id: tim010
+  category: time
+  coverage: in
+  question: "Track the late line rate by quarter across 1995 and 1996."
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('quarter', o.o_orderdate) AS DATE) AS order_quarter,
+           AVG(CASE WHEN l.l_receiptdate > l.l_commitdate THEN 1.0 ELSE 0.0 END) AS late_line_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY 1
+
+- id: tim011
+  category: time
+  coverage: in
+  question: "What was the average order value in each year from 1992 through 1998?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('year', o.o_orderdate) AS DATE) AS order_year,
+           SUM(CASE WHEN l.l_returnflag <> 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+             / COUNT(DISTINCT l.l_orderkey) AS average_order_value
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1992-01-01' AND o.o_orderdate < DATE '1999-01-01'
+    GROUP BY 1
+
+- id: tim012
+  category: time
+  coverage: in
+  question: "Monthly billed amount for the first half of 1997, please."
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('month', o.o_orderdate) AS DATE) AS order_month,
+           SUM(l.l_extendedprice * (1 - l.l_discount) * (1 + l.l_tax)) AS billed_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1997-07-01'
+    GROUP BY 1
+
+- id: tim013
+  category: time
+  coverage: in
+  question: "Show daily net revenue for March 1 through March 7, 1995."
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('day', o.o_orderdate) AS DATE) AS order_day,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1995-03-01' AND o.o_orderdate < DATE '1995-03-08'
+    GROUP BY 1
+
+- id: tim014
+  category: time
+  coverage: in
+  question: "How many units were ordered per quarter in 1997, split by customer market segment?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('quarter', o.o_orderdate) AS DATE) AS order_quarter,
+           c.c_mktsegment AS market_segment,
+           SUM(l.l_quantity) AS units_ordered
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    WHERE o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY 1, 2
+
+- id: tim015
+  category: time
+  coverage: in
+  question: "For order lines shipped in 1996, what was net revenue by month of shipment?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('month', l.l_shipdate) AS DATE) AS ship_month,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_returnflag <> 'R'
+      AND l.l_shipdate >= DATE '1996-01-01' AND l.l_shipdate < DATE '1997-01-01'
+    GROUP BY 1
+
+- id: tim016
+  category: time
+  coverage: in
+  question: "How many order lines shipped in each month of 1997, based on ship date?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('month', l.l_shipdate) AS DATE) AS ship_month,
+           COUNT(*) AS order_line_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_shipdate >= DATE '1997-01-01' AND l.l_shipdate < DATE '1998-01-01'
+    GROUP BY 1
+
+- id: tim017
+  category: time
+  coverage: in
+  question: "What was the late line rate by ship month for lines shipped during 1995?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('month', l.l_shipdate) AS DATE) AS ship_month,
+           AVG(CASE WHEN l.l_receiptdate > l.l_commitdate THEN 1.0 ELSE 0.0 END) AS late_line_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_shipdate >= DATE '1995-01-01' AND l.l_shipdate < DATE '1996-01-01'
+    GROUP BY 1
+
+- id: tim018
+  category: time
+  coverage: in
+  question: "What was year-over-year net revenue growth for each year from 1993 to 1997?"
+  order_matters: false
+  reference_sql: |
+    WITH yearly AS (
+      SELECT CAST(date_trunc('year', o.o_orderdate) AS DATE) AS order_year,
+             SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+      FROM lineitem l
+      JOIN orders o ON o.o_orderkey = l.l_orderkey
+      WHERE l.l_returnflag <> 'R'
+      GROUP BY 1
+    )
+    SELECT cur.order_year,
+           (cur.net_revenue - prev.net_revenue) / prev.net_revenue AS net_revenue_yoy_growth
+    FROM yearly cur
+    JOIN yearly prev ON prev.order_year = CAST(cur.order_year - INTERVAL 1 YEAR AS DATE)
+    WHERE cur.order_year >= DATE '1993-01-01' AND cur.order_year <= DATE '1997-01-01'
+
+- id: tim019
+  category: time
+  coverage: in
+  question: "Show monthly net revenue growth versus the same month of the prior year, for each month of 1996."
+  order_matters: false
+  reference_sql: |
+    WITH monthly AS (
+      SELECT CAST(date_trunc('month', o.o_orderdate) AS DATE) AS order_month,
+             SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+      FROM lineitem l
+      JOIN orders o ON o.o_orderkey = l.l_orderkey
+      WHERE l.l_returnflag <> 'R'
+      GROUP BY 1
+    )
+    SELECT cur.order_month,
+           (cur.net_revenue - prev.net_revenue) / prev.net_revenue AS net_revenue_yoy_growth
+    FROM monthly cur
+    JOIN monthly prev ON prev.order_month = CAST(cur.order_month - INTERVAL 1 YEAR AS DATE)
+    WHERE cur.order_month >= DATE '1996-01-01' AND cur.order_month < DATE '1997-01-01'
+
+- id: tim020
+  category: time
+  coverage: in
+  question: "Give the year-over-year net revenue growth for every quarter of 1994 and 1995."
+  order_matters: false
+  reference_sql: |
+    WITH quarterly AS (
+      SELECT CAST(date_trunc('quarter', o.o_orderdate) AS DATE) AS order_quarter,
+             SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+      FROM lineitem l
+      JOIN orders o ON o.o_orderkey = l.l_orderkey
+      WHERE l.l_returnflag <> 'R'
+      GROUP BY 1
+    )
+    SELECT cur.order_quarter,
+           (cur.net_revenue - prev.net_revenue) / prev.net_revenue AS net_revenue_yoy_growth
+    FROM quarterly cur
+    JOIN quarterly prev ON prev.order_quarter = CAST(cur.order_quarter - INTERVAL 1 YEAR AS DATE)
+    WHERE cur.order_quarter >= DATE '1994-01-01' AND cur.order_quarter < DATE '1996-01-01'
+
+- id: tim021
+  category: time
+  coverage: in
+  question: "For customers in the ASIA region, what was quarterly year-over-year net revenue growth in 1996 and 1997?"
+  order_matters: false
+  reference_sql: |
+    WITH quarterly AS (
+      SELECT CAST(date_trunc('quarter', o.o_orderdate) AS DATE) AS order_quarter,
+             SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+      FROM lineitem l
+      JOIN orders o ON o.o_orderkey = l.l_orderkey
+      JOIN customer c ON c.c_custkey = o.o_custkey
+      JOIN nation n ON n.n_nationkey = c.c_nationkey
+      JOIN region r ON r.r_regionkey = n.n_regionkey
+      WHERE l.l_returnflag <> 'R'
+        AND r.r_name = 'ASIA'
+      GROUP BY 1
+    )
+    SELECT cur.order_quarter,
+           (cur.net_revenue - prev.net_revenue) / prev.net_revenue AS net_revenue_yoy_growth
+    FROM quarterly cur
+    JOIN quarterly prev ON prev.order_quarter = CAST(cur.order_quarter - INTERVAL 1 YEAR AS DATE)
+    WHERE cur.order_quarter >= DATE '1996-01-01' AND cur.order_quarter < DATE '1998-01-01'
+
+- id: tim022
+  category: time
+  coverage: in
+  question: "How much did we give away in discounts each month from January through July 1998?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('month', o.o_orderdate) AS DATE) AS order_month,
+           SUM(l.l_extendedprice * l.l_discount) AS discount_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1998-01-01' AND o.o_orderdate < DATE '1998-08-01'
+    GROUP BY 1
+
+- id: tim023
+  category: time
+  coverage: in
+  question: "Which month of 1996 had the highest net revenue?"
+  order_matters: true
+  reference_sql: |
+    SELECT CAST(date_trunc('month', o.o_orderdate) AS DATE) AS order_month,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY 1
+    ORDER BY net_revenue DESC
+    LIMIT 1
+
+- id: tim024
+  category: time
+  coverage: in
+  question: "What was yearly gross revenue from customers in GERMANY for 1992 through 1997?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('year', o.o_orderdate) AS DATE) AS order_year,
+           SUM(l.l_extendedprice) AS gross_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    WHERE n.n_name = 'GERMANY'
+      AND o.o_orderdate >= DATE '1992-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY 1
+
+- id: tim025
+  category: time
+  coverage: in
+  question: "Break down the number of orders by quarter and order priority for 1993."
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('quarter', o.o_orderdate) AS DATE) AS order_quarter,
+           o.o_orderpriority AS order_priority,
+           COUNT(DISTINCT l.l_orderkey) AS order_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+    GROUP BY 1, 2

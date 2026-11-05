@@ -1,0 +1,193 @@
+- id: ooc001
+  category: out_of_coverage
+  coverage: raw_only
+  question: "What is the total value of the inventory currently held by suppliers based in Germany, valuing each part's available stock at the supplier's cost?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(ps.ps_supplycost * ps.ps_availqty) AS inventory_value
+    FROM partsupp ps
+    JOIN supplier s ON s.s_suppkey = ps.ps_suppkey
+    JOIN nation n ON n.n_nationkey = s.s_nationkey
+    WHERE n.n_name = 'GERMANY'
+
+- id: ooc002
+  category: out_of_coverage
+  coverage: raw_only
+  question: "What is the average account balance of our customers in each region?"
+  order_matters: false
+  reference_sql: |
+    SELECT r.r_name AS customer_region, AVG(c.c_acctbal) AS avg_account_balance
+    FROM customer c
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    JOIN region r ON r.r_regionkey = n.n_regionkey
+    GROUP BY r.r_name
+
+- id: ooc003
+  category: out_of_coverage
+  coverage: raw_only
+  question: "Which 10 suppliers have the highest account balance?"
+  order_matters: true
+  reference_sql: |
+    SELECT s.s_name AS supplier_name, s.s_acctbal AS account_balance
+    FROM supplier s
+    ORDER BY s.s_acctbal DESC
+    LIMIT 10
+
+- id: ooc004
+  category: out_of_coverage
+  coverage: raw_only
+  question: "For order lines shipped by AIR in 1996, how many days on average did it take from shipment to receipt?"
+  order_matters: false
+  reference_sql: |
+    SELECT AVG(l.l_receiptdate - l.l_shipdate) AS avg_days_ship_to_receipt
+    FROM lineitem l
+    WHERE l.l_shipmode = 'AIR'
+      AND l.l_shipdate >= DATE '1996-01-01' AND l.l_shipdate < DATE '1997-01-01'
+
+- id: ooc005
+  category: out_of_coverage
+  coverage: raw_only
+  question: "On average, how many lines did an order placed in 1997 have?"
+  order_matters: false
+  reference_sql: |
+    SELECT COUNT(*) * 1.0 / COUNT(DISTINCT o.o_orderkey) AS avg_lines_per_order
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+
+- id: ooc006
+  category: out_of_coverage
+  coverage: raw_only
+  question: "Which two clerks booked the most orders in 1995, and how many orders did each book?"
+  order_matters: true
+  reference_sql: |
+    SELECT o.o_clerk AS clerk, COUNT(*) AS orders_booked
+    FROM orders o
+    WHERE o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY o.o_clerk
+    ORDER BY orders_booked DESC
+    LIMIT 2
+
+- id: ooc007
+  category: out_of_coverage
+  coverage: raw_only
+  question: "How many products in our catalogue did not appear on any order placed in 1998?"
+  order_matters: false
+  reference_sql: |
+    SELECT COUNT(*) AS parts_not_ordered_1998
+    FROM part p
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM lineitem l
+      JOIN orders o ON o.o_orderkey = l.l_orderkey
+      WHERE l.l_partkey = p.p_partkey
+        AND o.o_orderdate >= DATE '1998-01-01' AND o.o_orderdate < DATE '1999-01-01'
+    )
+
+- id: ooc008
+  category: out_of_coverage
+  coverage: raw_only
+  question: "What is the average list price of a part for each manufacturer in our catalogue?"
+  order_matters: false
+  reference_sql: |
+    SELECT p.p_mfgr AS part_manufacturer, AVG(p.p_retailprice) AS avg_retail_price
+    FROM part p
+    GROUP BY p.p_mfgr
+
+- id: ooc009
+  category: out_of_coverage
+  coverage: raw_only
+  question: "What was our gross margin in 1996, i.e. net revenue minus the supplier cost of the units sold on those lines?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_extendedprice * (1 - l.l_discount) - ps.ps_supplycost * l.l_quantity) AS gross_margin
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN partsupp ps ON ps.ps_partkey = l.l_partkey AND ps.ps_suppkey = l.l_suppkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+
+- id: ooc010
+  category: out_of_coverage
+  coverage: raw_only
+  question: "How many order lines from orders placed in 1994 were sent with each delivery instruction (for example deliver in person or collect on delivery)?"
+  order_matters: false
+  reference_sql: |
+    SELECT l.l_shipinstruct AS ship_instruction, COUNT(*) AS order_lines
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY l.l_shipinstruct
+
+- id: ooc011
+  category: out_of_coverage
+  coverage: raw_only
+  question: "What were the three largest orders of 1997 by the total price recorded on the order?"
+  order_matters: true
+  reference_sql: |
+    SELECT o.o_orderkey AS order_key, o.o_totalprice AS order_total_price
+    FROM orders o
+    WHERE o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    ORDER BY o.o_totalprice DESC
+    LIMIT 3
+
+- id: ooc012
+  category: out_of_coverage
+  coverage: raw_only
+  question: "How many suppliers in each region are currently carrying a negative account balance?"
+  order_matters: false
+  reference_sql: |
+    SELECT r.r_name AS supplier_region, COUNT(*) AS suppliers_negative_balance
+    FROM supplier s
+    JOIN nation n ON n.n_nationkey = s.s_nationkey
+    JOIN region r ON r.r_regionkey = n.n_regionkey
+    WHERE s.s_acctbal < 0
+    GROUP BY r.r_name
+
+- id: ooc013
+  category: out_of_coverage
+  coverage: none
+  question: "How much did we spend on marketing campaigns in 1996, and what return did they generate in net revenue?"
+  order_matters: false
+
+- id: ooc014
+  category: out_of_coverage
+  coverage: none
+  question: "What was the average age of customers in Europe who placed an order in 1997?"
+  order_matters: false
+
+- id: ooc015
+  category: out_of_coverage
+  coverage: none
+  question: "What was the conversion rate from website sessions to orders in 1995?"
+  order_matters: false
+
+- id: ooc016
+  category: out_of_coverage
+  coverage: none
+  question: "What was our net promoter score for each market segment in 1996?"
+  order_matters: false
+
+- id: ooc017
+  category: out_of_coverage
+  coverage: none
+  question: "How much did we pay our carriers in freight charges for order lines shipped by TRUCK in 1997?"
+  order_matters: false
+
+- id: ooc018
+  category: out_of_coverage
+  coverage: none
+  question: "How many sales employees did we have at the end of 1996, and what was the net revenue per head?"
+  order_matters: false
+
+- id: ooc019
+  category: out_of_coverage
+  coverage: none
+  question: "What were the most common reasons customers gave for returning items ordered in 1995?"
+  order_matters: false
+
+- id: ooc020
+  category: out_of_coverage
+  coverage: none
+  question: "On how many days in 1996 was Brand#13 out of stock in our warehouses?"
+  order_matters: false

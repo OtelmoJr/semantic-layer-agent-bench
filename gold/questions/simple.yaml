@@ -1,0 +1,568 @@
+- id: sim001
+  category: simple
+  coverage: in
+  question: "What was our net revenue for orders placed in 1993?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+
+- id: sim002
+  category: simple
+  coverage: in
+  question: "What was the return rate for orders placed in 1994?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(CASE WHEN l.l_returnflag = 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+           / SUM(l.l_extendedprice * (1 - l.l_discount)) AS return_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+
+- id: sim003
+  category: simple
+  coverage: in
+  question: "How many active customers did we have in the second quarter of 1996, based on orders placed in that quarter?"
+  order_matters: false
+  reference_sql: |
+    SELECT COUNT(DISTINCT o.o_custkey) AS active_customers
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1996-04-01' AND o.o_orderdate < DATE '1996-07-01'
+
+- id: sim004
+  category: simple
+  coverage: in
+  question: "What was the average order value for orders placed in March 1997?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(CASE WHEN l.l_returnflag <> 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+           / COUNT(DISTINCT l.l_orderkey) AS average_order_value
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1997-03-01' AND o.o_orderdate < DATE '1997-04-01'
+
+- id: sim005
+  category: simple
+  coverage: in
+  question: "How much money did we give away in discounts on orders placed in 1992?"
+  order_matters: false
+  reference_sql: |
+    SELECT SUM(l.l_extendedprice * l.l_discount) AS discount_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1992-01-01' AND o.o_orderdate < DATE '1993-01-01'
+
+- id: sim006
+  category: simple
+  coverage: in
+  question: "What is the late line rate for orders placed in 1998?"
+  order_matters: false
+  reference_sql: |
+    SELECT AVG(CASE WHEN l.l_receiptdate > l.l_commitdate THEN 1.0 ELSE 0.0 END) AS late_line_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1998-01-01' AND o.o_orderdate < DATE '1999-01-01'
+
+- id: sim007
+  category: simple
+  coverage: in
+  question: "Which 5 customer nations generated the most net revenue on orders placed in 1996? Rank them from highest to lowest."
+  order_matters: true
+  reference_sql: |
+    SELECT n.n_name AS customer_nation,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY n.n_name
+    ORDER BY net_revenue DESC
+    LIMIT 5
+
+- id: sim008
+  category: simple
+  coverage: in
+  question: "What were the top 3 part brands by units ordered for orders placed in 1993?"
+  order_matters: true
+  reference_sql: |
+    SELECT p.p_brand AS part_brand,
+           SUM(l.l_quantity) AS units_ordered
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+    GROUP BY p.p_brand
+    ORDER BY units_ordered DESC
+    LIMIT 3
+
+- id: sim009
+  category: simple
+  coverage: in
+  question: "Who were our 10 biggest customers by net revenue in 1997 (by order date)? List them from largest to smallest."
+  order_matters: true
+  reference_sql: |
+    SELECT c.c_name AS customer_name,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY c.c_name
+    ORDER BY net_revenue DESC
+    LIMIT 10
+
+- id: sim010
+  category: simple
+  coverage: in
+  question: "Rank the top 3 ship modes by billed amount for orders placed in 1994."
+  order_matters: true
+  reference_sql: |
+    SELECT l.l_shipmode AS ship_mode,
+           SUM(l.l_extendedprice * (1 - l.l_discount) * (1 + l.l_tax)) AS billed_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY l.l_shipmode
+    ORDER BY billed_amount DESC
+    LIMIT 3
+
+- id: sim011
+  category: simple
+  coverage: in
+  question: "Which 5 part containers brought in the most gross revenue on orders placed in 1995, highest first?"
+  order_matters: true
+  reference_sql: |
+    SELECT p.p_container AS part_container,
+           SUM(l.l_extendedprice) AS gross_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY p.p_container
+    ORDER BY gross_revenue DESC
+    LIMIT 5
+
+- id: sim012
+  category: simple
+  coverage: in
+  question: "Which 5 part sizes appeared in the most orders placed in 1998? Rank by number of orders."
+  order_matters: true
+  reference_sql: |
+    SELECT p.p_size AS part_size,
+           COUNT(DISTINCT l.l_orderkey) AS order_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE o.o_orderdate >= DATE '1998-01-01' AND o.o_orderdate < DATE '1999-01-01'
+    GROUP BY p.p_size
+    ORDER BY order_count DESC
+    LIMIT 5
+
+- id: sim013
+  category: simple
+  coverage: in
+  question: "Show the 3 customer nations with the highest returned revenue on orders placed in 1993, highest first."
+  order_matters: true
+  reference_sql: |
+    SELECT n.n_name AS customer_nation,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS returned_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    WHERE l.l_returnflag = 'R'
+      AND o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+    GROUP BY n.n_name
+    ORDER BY returned_revenue DESC
+    LIMIT 3
+
+- id: sim014
+  category: simple
+  coverage: in
+  question: "Which 5 part types had the largest discount amount on orders placed in 1992? Rank from largest to smallest."
+  order_matters: true
+  reference_sql: |
+    SELECT p.p_type AS part_type,
+           SUM(l.l_extendedprice * l.l_discount) AS discount_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE o.o_orderdate >= DATE '1992-01-01' AND o.o_orderdate < DATE '1993-01-01'
+    GROUP BY p.p_type
+    ORDER BY discount_amount DESC
+    LIMIT 5
+
+- id: sim015
+  category: simple
+  coverage: in
+  question: "Break down net revenue by customer market segment for orders placed in 1997."
+  order_matters: false
+  reference_sql: |
+    SELECT c.c_mktsegment AS market_segment,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY c.c_mktsegment
+
+- id: sim016
+  category: simple
+  coverage: in
+  question: "What was the return rate for each ship mode on orders placed in 1995?"
+  order_matters: false
+  reference_sql: |
+    SELECT l.l_shipmode AS ship_mode,
+           SUM(CASE WHEN l.l_returnflag = 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+           / SUM(l.l_extendedprice * (1 - l.l_discount)) AS return_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY l.l_shipmode
+
+- id: sim017
+  category: simple
+  coverage: in
+  question: "How many orders were placed in 1996 at each order priority level?"
+  order_matters: false
+  reference_sql: |
+    SELECT o.o_orderpriority AS order_priority,
+           COUNT(DISTINCT l.l_orderkey) AS order_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY o.o_orderpriority
+
+- id: sim018
+  category: simple
+  coverage: in
+  question: "For orders placed in 1994, how many units were ordered under each return flag?"
+  order_matters: false
+  reference_sql: |
+    SELECT l.l_returnflag AS return_flag,
+           SUM(l.l_quantity) AS units_ordered
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY l.l_returnflag
+
+- id: sim019
+  category: simple
+  coverage: in
+  question: "How many order lines are fulfilled versus open, by line status, for orders placed in 1995?"
+  order_matters: false
+  reference_sql: |
+    SELECT l.l_linestatus AS line_status,
+           COUNT(*) AS order_line_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY l.l_linestatus
+
+- id: sim020
+  category: simple
+  coverage: in
+  question: "What was the average discount per part manufacturer on orders placed in 1993?"
+  order_matters: false
+  reference_sql: |
+    SELECT p.p_mfgr AS part_manufacturer,
+           AVG(l.l_discount) AS average_discount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+    GROUP BY p.p_mfgr
+
+- id: sim021
+  category: simple
+  coverage: in
+  question: "Show the billed amount by order status for orders placed in 1995."
+  order_matters: false
+  reference_sql: |
+    SELECT o.o_orderstatus AS order_status,
+           SUM(l.l_extendedprice * (1 - l.l_discount) * (1 + l.l_tax)) AS billed_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY o.o_orderstatus
+
+- id: sim022
+  category: simple
+  coverage: in
+  question: "How many active customers did each customer region have in 1998, based on orders placed that year?"
+  order_matters: false
+  reference_sql: |
+    SELECT r.r_name AS customer_region,
+           COUNT(DISTINCT o.o_custkey) AS active_customers
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    JOIN region r ON r.r_regionkey = n.n_regionkey
+    WHERE o.o_orderdate >= DATE '1998-01-01' AND o.o_orderdate < DATE '1999-01-01'
+    GROUP BY r.r_name
+
+- id: sim023
+  category: simple
+  coverage: in
+  question: "What was the average order value for each order priority in 1992 (orders placed that year)?"
+  order_matters: false
+  reference_sql: |
+    SELECT o.o_orderpriority AS order_priority,
+           SUM(CASE WHEN l.l_returnflag <> 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+           / COUNT(DISTINCT l.l_orderkey) AS average_order_value
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1992-01-01' AND o.o_orderdate < DATE '1993-01-01'
+    GROUP BY o.o_orderpriority
+
+- id: sim024
+  category: simple
+  coverage: in
+  question: "What was the late line rate by ship mode for orders placed in 1997?"
+  order_matters: false
+  reference_sql: |
+    SELECT l.l_shipmode AS ship_mode,
+           AVG(CASE WHEN l.l_receiptdate > l.l_commitdate THEN 1.0 ELSE 0.0 END) AS late_line_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY l.l_shipmode
+
+- id: sim025
+  category: simple
+  coverage: in
+  question: "Show gross revenue for each month of 1994, by order month."
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('month', o.o_orderdate) AS DATE) AS order_month,
+           SUM(l.l_extendedprice) AS gross_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY CAST(date_trunc('month', o.o_orderdate) AS DATE)
+
+- id: sim026
+  category: simple
+  coverage: in
+  question: "How much returned revenue did each market segment have on orders placed in 1993?"
+  order_matters: false
+  reference_sql: |
+    SELECT c.c_mktsegment AS market_segment,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS returned_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    WHERE l.l_returnflag = 'R'
+      AND o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+    GROUP BY c.c_mktsegment
+
+- id: sim027
+  category: simple
+  coverage: in
+  question: "What was the total discount amount by customer region for orders placed in 1996?"
+  order_matters: false
+  reference_sql: |
+    SELECT r.r_name AS customer_region,
+           SUM(l.l_extendedprice * l.l_discount) AS discount_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    JOIN region r ON r.r_regionkey = n.n_regionkey
+    WHERE o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY r.r_name
+
+- id: sim028
+  category: simple
+  coverage: in
+  question: "For orders placed in 1997, how many order lines were there for each part size from 1 to 5?"
+  order_matters: false
+  reference_sql: |
+    SELECT p.p_size AS part_size,
+           COUNT(*) AS order_line_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE p.p_size BETWEEN 1 AND 5
+      AND o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY p.p_size
+
+- id: sim029
+  category: simple
+  coverage: in
+  question: "What was net revenue in each quarter of 1996 (by order date)?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('quarter', o.o_orderdate) AS DATE) AS order_quarter,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE l.l_returnflag <> 'R'
+      AND o.o_orderdate >= DATE '1996-01-01' AND o.o_orderdate < DATE '1997-01-01'
+    GROUP BY CAST(date_trunc('quarter', o.o_orderdate) AS DATE)
+
+- id: sim030
+  category: simple
+  coverage: in
+  question: "What was the average discount for each ship mode on orders placed in 1998?"
+  order_matters: false
+  reference_sql: |
+    SELECT l.l_shipmode AS ship_mode,
+           AVG(l.l_discount) AS average_discount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1998-01-01' AND o.o_orderdate < DATE '1999-01-01'
+    GROUP BY l.l_shipmode
+
+- id: sim031
+  category: simple
+  coverage: in
+  question: "How many active customers were there in each market segment in 1994, counting customers who placed orders that year?"
+  order_matters: false
+  reference_sql: |
+    SELECT c.c_mktsegment AS market_segment,
+           COUNT(DISTINCT o.o_custkey) AS active_customers
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    WHERE o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY c.c_mktsegment
+
+- id: sim032
+  category: simple
+  coverage: in
+  question: "How many units were ordered from each part manufacturer on orders placed in 1992?"
+  order_matters: false
+  reference_sql: |
+    SELECT p.p_mfgr AS part_manufacturer,
+           SUM(l.l_quantity) AS units_ordered
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE o.o_orderdate >= DATE '1992-01-01' AND o.o_orderdate < DATE '1993-01-01'
+    GROUP BY p.p_mfgr
+
+- id: sim033
+  category: simple
+  coverage: in
+  question: "Give me gross revenue and net revenue by customer region for orders placed in 1995."
+  order_matters: false
+  reference_sql: |
+    SELECT r.r_name AS customer_region,
+           SUM(l.l_extendedprice) AS gross_revenue,
+           SUM(CASE WHEN l.l_returnflag <> 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END) AS net_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    JOIN region r ON r.r_regionkey = n.n_regionkey
+    WHERE o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY r.r_name
+
+- id: sim034
+  category: simple
+  coverage: in
+  question: "What was the billed amount for each return flag on orders placed in 1995?"
+  order_matters: false
+  reference_sql: |
+    SELECT l.l_returnflag AS return_flag,
+           SUM(l.l_extendedprice * (1 - l.l_discount) * (1 + l.l_tax)) AS billed_amount
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1995-01-01' AND o.o_orderdate < DATE '1996-01-01'
+    GROUP BY l.l_returnflag
+
+- id: sim035
+  category: simple
+  coverage: in
+  question: "What is the average order value by market segment for orders placed in 1998?"
+  order_matters: false
+  reference_sql: |
+    SELECT c.c_mktsegment AS market_segment,
+           SUM(CASE WHEN l.l_returnflag <> 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+           / COUNT(DISTINCT l.l_orderkey) AS average_order_value
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    WHERE o.o_orderdate >= DATE '1998-01-01' AND o.o_orderdate < DATE '1999-01-01'
+    GROUP BY c.c_mktsegment
+
+- id: sim036
+  category: simple
+  coverage: in
+  question: "How did the late line rate vary across order priorities for orders placed in 1993?"
+  order_matters: false
+  reference_sql: |
+    SELECT o.o_orderpriority AS order_priority,
+           AVG(CASE WHEN l.l_receiptdate > l.l_commitdate THEN 1.0 ELSE 0.0 END) AS late_line_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderdate >= DATE '1993-01-01' AND o.o_orderdate < DATE '1994-01-01'
+    GROUP BY o.o_orderpriority
+
+- id: sim037
+  category: simple
+  coverage: in
+  question: "What was the return rate for each customer nation on orders placed in 1992?"
+  order_matters: false
+  reference_sql: |
+    SELECT n.n_name AS customer_nation,
+           SUM(CASE WHEN l.l_returnflag = 'R' THEN l.l_extendedprice * (1 - l.l_discount) ELSE 0 END)
+           / SUM(l.l_extendedprice * (1 - l.l_discount)) AS return_rate
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN customer c ON c.c_custkey = o.o_custkey
+    JOIN nation n ON n.n_nationkey = c.c_nationkey
+    WHERE o.o_orderdate >= DATE '1992-01-01' AND o.o_orderdate < DATE '1993-01-01'
+    GROUP BY n.n_name
+
+- id: sim038
+  category: simple
+  coverage: in
+  question: "How many orders were placed in each year, across the full order history?"
+  order_matters: false
+  reference_sql: |
+    SELECT CAST(date_trunc('year', o.o_orderdate) AS DATE) AS order_year,
+           COUNT(DISTINCT l.l_orderkey) AS order_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    GROUP BY CAST(date_trunc('year', o.o_orderdate) AS DATE)
+
+- id: sim039
+  category: simple
+  coverage: in
+  question: "For parts made by Manufacturer#3, what was the returned revenue by part brand on orders placed in 1994?"
+  order_matters: false
+  reference_sql: |
+    SELECT p.p_brand AS part_brand,
+           SUM(l.l_extendedprice * (1 - l.l_discount)) AS returned_revenue
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    JOIN part p ON p.p_partkey = l.l_partkey
+    WHERE l.l_returnflag = 'R'
+      AND p.p_mfgr = 'Manufacturer#3'
+      AND o.o_orderdate >= DATE '1994-01-01' AND o.o_orderdate < DATE '1995-01-01'
+    GROUP BY p.p_brand
+
+- id: sim040
+  category: simple
+  coverage: in
+  question: "How many order lines did each ship mode carry for 1-URGENT priority orders placed in 1997?"
+  order_matters: false
+  reference_sql: |
+    SELECT l.l_shipmode AS ship_mode,
+           COUNT(*) AS order_line_count
+    FROM lineitem l
+    JOIN orders o ON o.o_orderkey = l.l_orderkey
+    WHERE o.o_orderpriority = '1-URGENT'
+      AND o.o_orderdate >= DATE '1997-01-01' AND o.o_orderdate < DATE '1998-01-01'
+    GROUP BY l.l_shipmode
