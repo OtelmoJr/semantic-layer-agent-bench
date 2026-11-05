@@ -1,0 +1,203 @@
+tim001:
+  metrics:
+  - net_revenue
+  group_by:
+  - metric_time__month
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+tim002:
+  metrics:
+  - net_revenue
+  group_by:
+  - metric_time__quarter
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1993-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+tim003:
+  metrics:
+  - order_count
+  group_by:
+  - metric_time__year
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1992-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+tim004:
+  metrics:
+  - net_revenue
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-07-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-10-01'''
+tim005:
+  metrics:
+  - net_revenue
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-03-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1994-04-01'''
+tim006:
+  metrics:
+  - active_customers
+  group_by:
+  - metric_time__month
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+tim007:
+  metrics:
+  - order_count
+  group_by:
+  - metric_time__week
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-04-01'''
+tim008:
+  metrics:
+  - net_revenue
+  group_by:
+  - metric_time__week
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-06-02'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-07-28'''
+tim009:
+  metrics:
+  - return_rate
+  group_by:
+  - metric_time__month
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+tim010:
+  metrics:
+  - late_line_rate
+  group_by:
+  - metric_time__quarter
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+tim011:
+  metrics:
+  - average_order_value
+  group_by:
+  - metric_time__year
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1992-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1999-01-01'''
+tim012:
+  metrics:
+  - billed_amount
+  group_by:
+  - metric_time__month
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-07-01'''
+tim013:
+  metrics:
+  - net_revenue
+  group_by:
+  - metric_time__day
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-03-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-03-08'''
+tim014:
+  metrics:
+  - units_ordered
+  group_by:
+  - metric_time__quarter
+  - customer__market_segment
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+tim015:
+  metrics:
+  - net_revenue
+  group_by:
+  - order_line__ship_date__month
+  where:
+  - '{{ TimeDimension(''order_line__ship_date'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''order_line__ship_date'', ''day'') }} < ''1997-01-01'''
+tim016:
+  metrics:
+  - order_line_count
+  group_by:
+  - order_line__ship_date__month
+  where:
+  - '{{ TimeDimension(''order_line__ship_date'', ''day'') }} >= ''1997-01-01'''
+  - '{{ TimeDimension(''order_line__ship_date'', ''day'') }} < ''1998-01-01'''
+tim017:
+  metrics:
+  - late_line_rate
+  group_by:
+  - order_line__ship_date__month
+  where:
+  - '{{ TimeDimension(''order_line__ship_date'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''order_line__ship_date'', ''day'') }} < ''1996-01-01'''
+tim018:
+  metrics:
+  - net_revenue_yoy_growth
+  group_by:
+  - metric_time__year
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1993-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+tim019:
+  metrics:
+  - net_revenue_yoy_growth
+  group_by:
+  - metric_time__month
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+tim020:
+  metrics:
+  - net_revenue_yoy_growth
+  group_by:
+  - metric_time__quarter
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+tim021:
+  metrics:
+  - net_revenue_yoy_growth
+  group_by:
+  - metric_time__quarter
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+  - '{{ Dimension(''customer__region'') }} = ''ASIA'''
+tim022:
+  metrics:
+  - discount_amount
+  group_by:
+  - metric_time__month
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1998-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-08-01'''
+tim023:
+  metrics:
+  - net_revenue
+  group_by:
+  - metric_time__month
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+  order_by:
+  - -net_revenue
+  limit: 1
+tim024:
+  metrics:
+  - gross_revenue
+  group_by:
+  - metric_time__year
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1992-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+  - '{{ Dimension(''customer__nation'') }} = ''GERMANY'''
+tim025:
+  metrics:
+  - order_count
+  group_by:
+  - metric_time__quarter
+  - order_line__order_priority
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1993-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1994-01-01'''

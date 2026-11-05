@@ -1,0 +1,12 @@
+name: slab
+version: "0.1.0"
+config-version: 2
+profile: slab
+model-paths: ["models"]
+target-path: target
+clean-targets: [target, logs]
+
+models:
+  slab:
+    +schema: sl
+    +materialized: view

@@ -1,0 +1,16 @@
+slab:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: "{{ env_var('SLAB_DB_PATH', '../data/tpch.duckdb') }}"
+      schema: sl
+      threads: 4
+    # MetricFlow only needs the adapter for the SQL dialect when compiling queries.
+    # Pointing it at an in-memory database keeps it from holding a read-write handle on
+    # the real file, which the guarded read-only connection then executes against.
+    compile:
+      type: duckdb
+      path: ":memory:"
+      schema: sl
+      threads: 1

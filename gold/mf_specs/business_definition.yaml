@@ -1,0 +1,177 @@
+bd001:
+  metrics:
+  - net_revenue
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+bd002:
+  metrics:
+  - net_revenue
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-10-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+bd003:
+  metrics:
+  - return_rate
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+bd004:
+  metrics:
+  - average_order_value
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1993-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1994-01-01'''
+bd005:
+  metrics:
+  - late_line_rate
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+bd006:
+  metrics:
+  - net_revenue
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1993-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1994-01-01'''
+  - '{{ Dimension(''customer__region'') }} = ''EUROPE'''
+bd007:
+  metrics:
+  - net_revenue
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1993-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1994-01-01'''
+  - '{{ Dimension(''supplier__region'') }} = ''EUROPE'''
+bd008:
+  metrics:
+  - active_customers
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+bd009:
+  metrics:
+  - active_customers
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-07-01'''
+  - '{{ Dimension(''customer__market_segment'') }} = ''AUTOMOBILE'''
+bd010:
+  metrics:
+  - net_revenue
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-12-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+bd011:
+  metrics:
+  - average_order_value
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+  - '{{ Dimension(''customer__region'') }} = ''ASIA'''
+bd012:
+  metrics:
+  - return_rate
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1993-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1994-01-01'''
+  - '{{ Dimension(''customer__nation'') }} = ''GERMANY'''
+bd013:
+  metrics:
+  - billed_amount
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+bd014:
+  metrics:
+  - discount_amount
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1993-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1994-01-01'''
+bd015:
+  metrics:
+  - units_ordered
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+  - '{{ Dimension(''customer__market_segment'') }} = ''HOUSEHOLD'''
+bd016:
+  metrics:
+  - net_revenue
+  group_by:
+  - customer__region
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+bd017:
+  metrics:
+  - net_revenue
+  group_by:
+  - supplier__region
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+bd018:
+  metrics:
+  - late_line_rate
+  group_by:
+  - order_line__ship_mode
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+bd019:
+  metrics:
+  - net_revenue
+  group_by:
+  - customer__nation
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+  order_by:
+  - -net_revenue
+  limit: 5
+bd020:
+  metrics:
+  - gross_revenue
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+bd021:
+  metrics:
+  - order_count
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-04-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-07-01'''
+  - '{{ Dimension(''customer__region'') }} = ''AMERICA'''
+bd022:
+  metrics:
+  - net_revenue
+  group_by:
+  - customer__market_segment
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-04-01'''
+  order_by:
+  - -net_revenue
+  limit: 3
+bd023:
+  metrics:
+  - return_rate
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1993-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1994-01-01'''
+  - '{{ Dimension(''supplier__region'') }} = ''ASIA'''
+bd024:
+  metrics:
+  - average_order_value
+  group_by:
+  - metric_time__quarter
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+bd025:
+  metrics:
+  - active_customers
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-07-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-10-01'''
+  - '{{ Dimension(''customer__region'') }} = ''EUROPE'''

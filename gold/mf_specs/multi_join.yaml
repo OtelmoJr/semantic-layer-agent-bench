@@ -1,0 +1,429 @@
+mj001:
+  metrics:
+  - net_revenue
+  group_by:
+  - customer__region
+  - supplier__region
+  where:
+  - '{{ Dimension(''order_line__return_flag'') }} <> ''R'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+mj002:
+  metrics:
+  - units_ordered
+  group_by:
+  - part__manufacturer
+  where:
+  - '{{ Dimension(''customer__region'') }} = ''ASIA'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+mj003:
+  metrics:
+  - active_customers
+  group_by:
+  - customer__market_segment
+  - customer__nation
+  where:
+  - '{{ Dimension(''customer__region'') }} = ''EUROPE'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+mj004:
+  metrics:
+  - net_revenue
+  group_by:
+  - supplier__name
+  where:
+  - '{{ Dimension(''order_line__return_flag'') }} <> ''R'''
+  - '{{ Dimension(''part__brand'') }} = ''Brand#23'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+  order_by:
+  - -net_revenue
+  limit: 10
+mj005:
+  metrics:
+  - order_count
+  group_by:
+  - customer__region
+  - order_line__order_priority
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1993-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1994-01-01'''
+mj006:
+  metrics:
+  - return_rate
+  group_by:
+  - supplier__nation
+  where:
+  - '{{ Dimension(''customer__region'') }} = ''AMERICA'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+mj007:
+  metrics:
+  - gross_revenue
+  group_by:
+  - part__manufacturer
+  - supplier__region
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+mj008:
+  metrics:
+  - net_revenue
+  group_by:
+  - customer__nation
+  where:
+  - '{{ Dimension(''order_line__return_flag'') }} <> ''R'''
+  - '{{ Dimension(''supplier__region'') }} = ''EUROPE'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+  order_by:
+  - -net_revenue
+  limit: 5
+mj009:
+  metrics:
+  - average_order_value
+  group_by:
+  - customer__region
+  - customer__market_segment
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+mj010:
+  metrics:
+  - discount_amount
+  group_by:
+  - supplier__region
+  - order_line__ship_mode
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-04-01'''
+mj011:
+  metrics:
+  - billed_amount
+  group_by:
+  - customer__nation
+  - metric_time__quarter
+  where:
+  - '{{ Dimension(''customer__region'') }} = ''AFRICA'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+mj012:
+  metrics:
+  - late_line_rate
+  group_by:
+  - supplier__region
+  - customer__region
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+mj013:
+  metrics:
+  - net_revenue
+  group_by:
+  - customer__name
+  where:
+  - '{{ Dimension(''order_line__return_flag'') }} <> ''R'''
+  - '{{ Dimension(''customer__region'') }} = ''MIDDLE EAST'''
+  - '{{ Dimension(''part__manufacturer'') }} = ''Manufacturer#3'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+  order_by:
+  - -net_revenue
+  limit: 10
+mj014:
+  metrics:
+  - order_line_count
+  group_by:
+  - part__container
+  where:
+  - '{{ Dimension(''customer__region'') }} = ''EUROPE'''
+  - '{{ Dimension(''supplier__nation'') }} = ''GERMANY'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1993-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1994-01-01'''
+mj015:
+  metrics:
+  - returned_revenue
+  group_by:
+  - customer__region
+  - supplier__nation
+  where:
+  - '{{ Dimension(''order_line__return_flag'') }} = ''R'''
+  - '{{ Dimension(''supplier__region'') }} = ''ASIA'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+mj016:
+  metrics:
+  - average_discount
+  group_by:
+  - customer__market_segment
+  - supplier__region
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1992-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1993-01-01'''
+mj017:
+  metrics:
+  - units_ordered
+  group_by:
+  - supplier__nation
+  where:
+  - '{{ Dimension(''customer__market_segment'') }} = ''AUTOMOBILE'''
+  - '{{ Dimension(''customer__nation'') }} = ''JAPAN'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+  order_by:
+  - -units_ordered
+  limit: 3
+mj018:
+  metrics:
+  - active_customers
+  group_by:
+  - customer__region
+  - part__manufacturer
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1998-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1999-01-01'''
+mj019:
+  metrics:
+  - net_revenue
+  group_by:
+  - metric_time__month
+  where:
+  - '{{ Dimension(''order_line__return_flag'') }} <> ''R'''
+  - '{{ Dimension(''customer__nation'') }} = ''FRANCE'''
+  - '{{ Dimension(''supplier__nation'') }} = ''GERMANY'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+mj020:
+  metrics:
+  - order_count
+  group_by:
+  - order_line__order_status
+  - supplier__region
+  where:
+  - '{{ Dimension(''customer__nation'') }} = ''CANADA'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+mj021:
+  metrics:
+  - net_revenue
+  group_by:
+  - part__brand
+  where:
+  - '{{ Dimension(''order_line__return_flag'') }} <> ''R'''
+  - '{{ Dimension(''customer__market_segment'') }} = ''BUILDING'''
+  - '{{ Dimension(''customer__region'') }} = ''ASIA'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+  order_by:
+  - -net_revenue
+  limit: 5
+mj022:
+  metrics:
+  - gross_revenue
+  group_by:
+  - customer__market_segment
+  - supplier__nation
+  where:
+  - '{{ Dimension(''customer__nation'') }} = ''BRAZIL'''
+  - '{{ Dimension(''supplier__region'') }} = ''AMERICA'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+mj023:
+  metrics:
+  - units_ordered
+  group_by:
+  - part__size
+  - customer__region
+  where:
+  - '{{ Dimension(''part__size'') }} BETWEEN 1 AND 10'
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+mj024:
+  metrics:
+  - billed_amount
+  group_by:
+  - supplier__name
+  where:
+  - '{{ Dimension(''supplier__region'') }} = ''EUROPE'''
+  - '{{ Dimension(''customer__market_segment'') }} = ''HOUSEHOLD'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-10-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+  order_by:
+  - -billed_amount
+  limit: 10
+mj025:
+  metrics:
+  - return_rate
+  group_by:
+  - part__manufacturer
+  - customer__region
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1993-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1994-01-01'''
+mj026:
+  metrics:
+  - net_revenue
+  group_by:
+  - metric_time__year
+  - supplier__region
+  where:
+  - '{{ Dimension(''order_line__return_flag'') }} <> ''R'''
+  - '{{ Dimension(''customer__market_segment'') }} = ''MACHINERY'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1992-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+mj027:
+  metrics:
+  - discount_amount
+  group_by:
+  - customer__region
+  - part__manufacturer
+  where:
+  - '{{ Dimension(''order_line__order_priority'') }} = ''1-URGENT'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+mj028:
+  metrics:
+  - late_line_rate
+  group_by:
+  - supplier__nation
+  - order_line__ship_mode
+  where:
+  - '{{ Dimension(''supplier__region'') }} = ''AFRICA'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+mj029:
+  metrics:
+  - average_order_value
+  group_by:
+  - customer__nation
+  where:
+  - '{{ Dimension(''part__manufacturer'') }} = ''Manufacturer#5'''
+  - '{{ Dimension(''supplier__region'') }} = ''ASIA'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+  order_by:
+  - -average_order_value
+  limit: 5
+mj030:
+  metrics:
+  - order_line_count
+  group_by:
+  - order_line__line_status
+  - customer__region
+  where:
+  - '{{ Dimension(''supplier__region'') }} = ''MIDDLE EAST'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+mj031:
+  metrics:
+  - billed_amount
+  group_by:
+  - metric_time__quarter
+  - customer__region
+  where:
+  - '{{ Dimension(''part__container'') }} = ''LG BOX'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+mj032:
+  metrics:
+  - active_customers
+  group_by:
+  - supplier__region
+  - customer__market_segment
+  where:
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+mj033:
+  metrics:
+  - net_revenue
+  group_by:
+  - part__part_type
+  where:
+  - '{{ Dimension(''order_line__return_flag'') }} <> ''R'''
+  - '{{ Dimension(''customer__nation'') }} = ''GERMANY'''
+  - '{{ Dimension(''supplier__region'') }} = ''EUROPE'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1995-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-01-01'''
+  order_by:
+  - -net_revenue
+  limit: 10
+mj034:
+  metrics:
+  - average_discount
+  group_by:
+  - part__brand
+  where:
+  - '{{ Dimension(''part__manufacturer'') }} = ''Manufacturer#2'''
+  - '{{ Dimension(''customer__region'') }} = ''AMERICA'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1998-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1999-01-01'''
+mj035:
+  metrics:
+  - net_revenue
+  group_by:
+  - customer__nation
+  - order_line__order_priority
+  where:
+  - '{{ Dimension(''order_line__return_flag'') }} <> ''R'''
+  - '{{ Dimension(''customer__region'') }} = ''ASIA'''
+  - '{{ Dimension(''supplier__region'') }} = ''ASIA'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1997-01-01'''
+mj036:
+  metrics:
+  - returned_revenue
+  group_by:
+  - supplier__nation
+  where:
+  - '{{ Dimension(''order_line__return_flag'') }} = ''R'''
+  - '{{ Dimension(''customer__region'') }} = ''EUROPE'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1993-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1994-01-01'''
+  order_by:
+  - -returned_revenue
+  limit: 5
+mj037:
+  metrics:
+  - units_ordered
+  group_by:
+  - order_line__return_flag
+  - supplier__region
+  where:
+  - '{{ Dimension(''customer__market_segment'') }} = ''FURNITURE'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1994-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1995-01-01'''
+mj038:
+  metrics:
+  - gross_revenue
+  group_by:
+  - metric_time__week
+  where:
+  - '{{ Dimension(''customer__nation'') }} = ''INDIA'''
+  - '{{ Dimension(''part__brand'') }} = ''Brand#45'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1996-04-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1996-07-01'''
+mj039:
+  metrics:
+  - order_count
+  group_by:
+  - customer__nation
+  - supplier__region
+  where:
+  - '{{ Dimension(''customer__nation'') }} IN (''CHINA'', ''INDIA'')'
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+mj040:
+  metrics:
+  - net_revenue
+  group_by:
+  - supplier__name
+  where:
+  - '{{ Dimension(''order_line__return_flag'') }} <> ''R'''
+  - '{{ Dimension(''customer__nation'') }} = ''UNITED STATES'''
+  - '{{ Dimension(''supplier__region'') }} = ''ASIA'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} >= ''1997-01-01'''
+  - '{{ TimeDimension(''metric_time'', ''day'') }} < ''1998-01-01'''
+  order_by:
+  - -net_revenue
+  limit: 10

@@ -1,0 +1,12 @@
+version: 2
+sources:
+  - name: tpch
+    schema: main
+    tables:
+      - name: lineitem
+      - name: orders
+      - name: customer
+      - name: nation
+      - name: region
+      - name: part
+      - name: supplier
