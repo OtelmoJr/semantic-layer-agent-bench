@@ -38,7 +38,13 @@ def connect_readonly(path: Path | str | None = None) -> duckdb.DuckDBPyConnectio
     if not path.exists():
         raise FileNotFoundError(f"database not found at {path}; run `make data` first")
     con = duckdb.connect(str(path), read_only=True, config=dict(_LOCKED_CONFIG))
-    con.execute("SET lock_configuration = true")
+    try:
+        con.execute("SET lock_configuration = true")
+    except duckdb.InvalidInputException as e:
+        # A second connection in the same process shares the database instance, whose
+        # configuration an earlier connection already locked. That is the state we want.
+        if "locked" not in str(e):
+            raise
     return con
 
 

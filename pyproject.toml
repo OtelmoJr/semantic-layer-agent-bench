@@ -39,4 +39,5 @@ testpaths = ["tests"]
 markers = [
   "data: needs the generated TPC-H database (make data)",
   "semantic: needs the dbt/MetricFlow project built (make data)",
+  "slow: spawns subprocesses, kills them",
 ]
