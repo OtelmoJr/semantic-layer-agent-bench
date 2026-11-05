@@ -31,7 +31,10 @@ class AnthropicProvider:
         out: list[dict[str, Any]] = []
         for m in messages:
             if m.role == "user":
-                out.append({"role": "user", "content": m.text})
+                if out and out[-1]["role"] == "user" and isinstance(out[-1]["content"], list):
+                    out[-1]["content"].append({"type": "text", "text": m.text})
+                else:
+                    out.append({"role": "user", "content": m.text})
             elif m.role == "assistant":
                 blocks: list[dict[str, Any]] = []
                 if m.text:

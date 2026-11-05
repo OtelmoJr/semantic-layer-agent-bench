@@ -119,7 +119,7 @@ flowchart TB
   the 150 questions and reference SQL from the glossary and the raw schema, without
   access to any MetricFlow spec. While they worked, the semantic layer YAML was written
   from the glossary by a different author, who did not read the questions. The gold set
-  was validated and frozen (commit `d28debe`) before any per-question MetricFlow spec
+  was validated and frozen (commit `feat(slab): freeze gold set ...`) before any per-question MetricFlow spec
   existed. Specs were then written per question and must reproduce the reference result
   exactly (`parity: 130/130`).
 - **Residual risk.** All authors were AI-assisted and worked from the same glossary.

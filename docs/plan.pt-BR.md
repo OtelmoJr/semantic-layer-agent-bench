@@ -10,7 +10,7 @@
 > **Status em 05/nov/2026.** S0 a S3 estão implementados e testados: dados, gold set
 > congelado (150 perguntas, hash `2b8663f4…`), semantic layer com paridade 130/130, MCP
 > servers, loop do agente, runner resumível, store Delta, estatística, relatório, CI e
-> 82 testes. **Ainda não existe nenhum resultado com modelo real.** S4 (rodar Ollama e
+> 83 testes. **Ainda não existe nenhum resultado com modelo real.** S4 (rodar Ollama e
 > Claude) e S5 (README com números) dependem de GPU/Ollama e de chave da API, que não
 > estavam disponíveis no ambiente de build.
 

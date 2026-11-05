@@ -6,7 +6,7 @@ Status as of 2026-11-05. Every checked item has output behind it in the README o
 
 ## Build and correctness
 
-- [x] `make data gold-check parity test smoke` passes from a clean checkout (2 min 29 s, 4 vCPU)
+- [x] `make data gold-check parity test smoke` passes from a clean checkout (2 min 28 s, 4 vCPU)
 - [x] `gold-check` OK and hash equals the frozen `gold/HASH` (`2b8663f4…`)
 - [x] `parity`: 130/130 in-coverage questions match
 - [x] Guard suite covers file access, settings, DDL/DML, ATTACH/COPY/PRAGMA/INSTALL/LOAD/CALL, table functions, schema escape, timeouts

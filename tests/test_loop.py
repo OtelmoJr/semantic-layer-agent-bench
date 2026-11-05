@@ -54,12 +54,14 @@ def test_text_only_answer_is_no_answer():
     assert att.status == "no_answer" and att.submission is None
 
 
-def test_budget_then_final_round_only_offers_terminal_tools():
+def test_budget_then_final_round_warns_and_stops_on_more_exploration():
     p = Scripted([call("run_sql", sql="1")] * 3 + [call("run_sql", sql="again")])
     att = run(p, max_tool_calls=3)
     assert att.status == "max_steps"
-    assert p.seen_tools[-1] == ["submit_sql", "refuse"]
     assert att.tool_calls == 3
+    # tool list is stable across turns; the last user message announces the budget
+    assert p.seen_tools[0] == p.seen_tools[-1]
+    assert att.transcript[-2]["role"] == "user" and "budget exhausted" in att.transcript[-2]["text"]
 
 
 def test_final_round_can_still_submit():

@@ -45,7 +45,7 @@ under [Run the benchmark](#run-the-benchmark).
 
 - **Questions frozen before the semantic layer was used for them.** 150 business questions
   were written by four independent writers from the glossary and pinned by SHA-256 in
-  `gold/HASH` (commit `d28debe`). MetricFlow specs for the parity test came after. Every
+  `gold/HASH` (commit `feat(slab): freeze gold set ...`). MetricFlow specs for the parity test came after. Every
   run records the hash and refuses to start if the gold set changed.
 - **Parity test.** All 130 in-coverage questions are answered by the semantic layer with
   the same result as their reference SQL (`130/130`). Arm C can never lose because of my
@@ -93,8 +93,8 @@ make data gold-check parity test smoke
 ```
 
 That generates TPC-H SF1 (6M order lines), builds the semantic layer, validates the frozen
-gold set, runs parity, the 82 tests and a scripted end-to-end smoke run. No model, no
-network, no API key. Real output from a clean run on 2026-11-05 (2 min 29 s on 4 vCPU):
+gold set, runs parity, the 83 tests and a scripted end-to-end smoke run. No model, no
+network, no API key. Real output from a clean run on 2026-11-05 (2 min 28 s on 4 vCPU):
 
 ```text
 150 questions {'business_definition': 25, 'multi_join': 40, 'out_of_coverage': 20, 'simple': 40, 'time': 25}
@@ -102,7 +102,7 @@ sha256 2b8663f422b012acf5935e31f4ffd0d468e0552a93f9d0cda071f35676069f23
 hash matches frozen gold set
 OK
 parity: 130/130 match
-82 passed in 71.75s (0:01:11)
+83 passed in 69.50s (0:01:09)
 run smoke finished: 10 questions x 3 arms x 1
 | stub-scripted-v1 | A raw schema | 10 | 70.0% | 40.0% – 100.0% | 70.0% |
 | stub-scripted-v1 | B raw + glossary | 10 | 70.0% | 40.0% – 100.0% | 70.0% |

@@ -26,6 +26,12 @@ def test_anthropic_groups_parallel_tool_results_in_one_user_turn():
     assert results[1]["is_error"] is True
 
 
+def test_anthropic_appends_user_note_to_pending_tool_results():
+    api = AnthropicProvider._to_api(HISTORY + [Message("user", "budget exhausted")])
+    assert [m["role"] for m in api] == ["user", "assistant", "user"]
+    assert api[2]["content"][-1] == {"type": "text", "text": "budget exhausted"}
+
+
 def test_ollama_roundtrip_with_mock_server():
     seen = {}
 

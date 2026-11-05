@@ -18,6 +18,7 @@ from slab.agent.providers.base import Message, Provider, ProviderError, ToolSpec
 from slab.tracing import tracer
 
 MAX_TOOL_RESULT_CHARS = 12_000
+BUDGET_NOTE = "Tool budget exhausted. Call {submit} with your final answer now, or refuse."
 
 TERMINAL_TOOLS: dict[str, ToolSpec] = {
     "submit_sql": ToolSpec(
@@ -116,12 +117,14 @@ async def _run(provider: Provider, backend: ToolBackend, arm: str, question_id: 
         ]
         return att
 
-    terminal_only = [TERMINAL_TOOLS[submit], TERMINAL_TOOLS["refuse"]]
     while True:
-        # Once the exploration budget is spent, the model gets one last turn with only the
-        # terminal tools, so it can still submit what it has.
+        # Once the exploration budget is spent, the model gets one last turn to submit or
+        # refuse. The tool list stays the same (providers reject histories that reference
+        # tools no longer declared); any further exploration call ends the attempt.
         final_round = att.tool_calls >= max_tool_calls
-        current_tools = terminal_only if final_round else tools
+        if final_round and not (messages[-1].role == "user" and messages[-1].text == BUDGET_NOTE.format(submit=submit)):
+            messages.append(Message("user", BUDGET_NOTE.format(submit=submit)))
+        current_tools = tools
         with tr.start_as_current_span("gen_ai.chat") as span:
             span.set_attribute("gen_ai.operation.name", "chat")
             span.set_attribute("gen_ai.system", provider.name)
